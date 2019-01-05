@@ -1,13 +1,25 @@
 defmodule AssertHtml.MixProject do
   use Mix.Project
 
+  @version "0.0.1"
+
   def project do
     [
       app: :assert_html,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+
+      # # Hex
+      # description: "",
+      # package: package(),
+
+      # Docs
+      name: "AssertHtml",
+      docs: docs(),
+
+      # dev
       dialyzer: [ignore_warnings: ".dialyzer_ignore.exs"]
     ]
   end
@@ -23,8 +35,17 @@ defmodule AssertHtml.MixProject do
   defp deps do
     [
       {:floki, ">= 0.20.3"},
+      {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.17", only: :dev, runtime: false}
+    ]
+  end
 
-      {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false}
+  defp docs do
+    [
+      main: "AssertHtml",
+      source_ref: "v#{@version}",
+      extras: ["README.md"],
+      source_url: "https://github.com/Kr00lIX/assert_html"
     ]
   end
 end

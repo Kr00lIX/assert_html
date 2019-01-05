@@ -1,21 +1,23 @@
 defmodule AssertHtml.Matcher do
+  @moduledoc false
 
-  import ExUnit.Assertions, only: [assert: 2, refute: 2]
   alias AssertHtml
   alias AssertHtml.Parser
 
   @typep assert_or_refute :: :assert | :refute
 
-  @spec selector(assert_or_refute, AssertHtml.html, AssertHtml.selector) :: AssertHtml.response
+  @spec selector(assert_or_refute, AssertHtml.html(), AssertHtml.css_selector()) ::
+          AssertHtml.html() | no_return()
   def selector(matcher, html, selector) do
     doc = Parser.find(html, selector)
     match!(matcher, doc != [], "Selector `#{selector}` not found:\n Result HTML: #{html}")
     doc
   end
 
-  def assert_attributes(html, selector, attributes) do
+  def assert_attributes(html, _selector, _attributes) do
     # TODO
 
+    html
   end
 
   def match_text(matcher, html, selector, value) do
@@ -25,7 +27,7 @@ defmodule AssertHtml.Matcher do
 
   def match_text(matcher, html, value) do
     str_value = to_string(value)
-    match! matcher, html =~ str_value, "Error not found `#{value}` value: #{html}"
+    match!(matcher, html =~ str_value, "Error not found `#{value}` value: #{html}")
   end
 
   defp match(check, condition) do
@@ -39,9 +41,8 @@ defmodule AssertHtml.Matcher do
   defp match!(check, condition, message) do
     if match(check, condition) do
       raise ExUnit.AssertionError,
-      expr: "expr",
-      message: message
+        expr: "expr",
+        message: message
     end
   end
-
 end

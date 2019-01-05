@@ -1,8 +1,9 @@
-
 defmodule AssertHtml.Parser do
+  @moduledoc false
+
   @typep html_element_tuple :: any()
 
-  @spec find(AssertHtml.html, AssertHtml.selector) :: html_element_tuple
+  @spec find(AssertHtml.html(), AssertHtml.css_selector()) :: html_element_tuple
   def find(html, selector) do
     Floki.find(html, selector)
   end
@@ -14,6 +15,9 @@ defmodule AssertHtml.Parser do
     end
   end
 
+  @doc """
+  Returns attribute value for a given selector.
+  """
   def attribute(html, name) do
     case Floki.attribute(html, name) do
       [value] -> value
@@ -29,4 +33,3 @@ defmodule AssertHtml.Parser do
     Floki.raw_html(html_element_tuple)
   end
 end
-
