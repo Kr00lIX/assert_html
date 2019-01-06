@@ -55,6 +55,10 @@ defmodule AssertHtml do
       iex> html = ~S{ <p><div class="foo"><h1>Header</h1</div></p>  }
       ...> html_selector(html, "p .foo")
       ~S{<div class="foo"><h1>Header</h1></div>}
+
+      iex> html = ~S{ <p><div class="foo"><h1>Header</h1</div></p>  }
+      ...> html_selector(html, "h1")
+      "<h1>Header</h1>"
   """
   @spec html_selector(html, css_selector) :: html | nil
   def html_selector(html, css_selector) do
@@ -76,9 +80,54 @@ defmodule AssertHtml do
     Selector.text(html, css_selector)
   end
 
+  @doc """
+  Asserts an element in HTML
+  """
   @spec assert_html_selector(html, css_selector) :: html | no_return
   def assert_html_selector(html, css_selector) do
     Matcher.selector(:assert, html, css_selector)
+    html
+  end
+
+  @spec assert_html_text(html, value) :: html | no_return
+  def assert_html_text(html, value) do
+    Matcher.compare_text(:assert, html, value)
+    html
+  end
+
+  @spec assert_html_text(html, css_selector, value) :: html | no_return
+  def assert_html_text(html, css_selector, value) do
+    Matcher.match_text(:assert, html, css_selector, value)
+    html
+  end
+
+  @spec refute_html_text(html, css_selector, value) :: html | no_return
+  def refute_html_text(html, css_selector, value) do
+    Matcher.compare_text(:refute, html, css_selector, value)
+    html
+  end
+
+  @spec assert_match_html_text(html, value) :: html | no_return
+  def assert_match_html_text(html, value) do
+    Matcher.match_text(:assert, html, value)
+    html
+  end
+
+  @spec assert_match_html_text(html, css_selector, value) :: html | no_return
+  def assert_match_html_text(html, css_selector, value) do
+    Matcher.match_text(:assert, css_selector, value)
+    html
+  end
+
+  @spec refute_match_html_text(html, value) :: html | no_return
+  def refute_match_html_text(html, value) do
+    Matcher.match_text(:refute, html, value)
+    html
+  end
+
+  @spec refute_match_html_text(html, css_selector, value) :: html | no_return
+  def refute_match_html_text(html, css_selector, value) do
+    Matcher.match_text(:refute, css_selector, value)
     html
   end
 
@@ -91,24 +140,6 @@ defmodule AssertHtml do
   @spec assert_html_attributes(html, css_selector, attributes) :: html | no_return
   def assert_html_attributes(html, css_selector, attributes) do
     Matcher.assert_attributes(html, css_selector, attributes)
-    html
-  end
-
-  @spec assert_html_text(html, css_selector, value) :: html | no_return
-  def assert_html_text(html, css_selector, value) do
-    Matcher.match_text(:assert, css_selector, value)
-    html
-  end
-
-  @spec assert_html_text(html, value) :: html | no_return
-  def assert_html_text(html, value) do
-    Matcher.match_text(:assert, html, value)
-    html
-  end
-
-  @spec refute_html_text(html, css_selector, value) :: html | no_return
-  def refute_html_text(html, css_selector, value) do
-    Matcher.match_text(:refute, css_selector, value)
     html
   end
 
