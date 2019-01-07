@@ -15,12 +15,21 @@ defmodule AssertHtml.Selector do
   end
 
   @spec attribute(AssertHtml.html(), AssertHtml.css_selector(), AssertHtml.attribute_name()) :: AssertHtml.html()
+  def attribute(html, css_selector, "text") do
+    text(html, css_selector)
+  end
+
   def attribute(html, css_selector, name) do
     Parser.attribute(html, css_selector, name)
   end
 
+  def attribute(html, "text") do
+    text(html)
+  end
+
   def attribute(html, name) do
-    Parser.attribute(html, name)
+    html
+    |> Parser.attribute(name)
   end
 
   @doc ~S"""
@@ -30,6 +39,15 @@ defmodule AssertHtml.Selector do
   def text(html, css_selector) do
     html
     |> Parser.find(css_selector)
+    |> text()
+  end
+
+  @doc ~S"""
+  Gets text from HTML element
+  """
+  @spec text(AssertHtml.html()) :: String.t()
+  def text(html) do
+    html
     |> Parser.text()
     |> String.trim()
   end

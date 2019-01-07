@@ -143,7 +143,7 @@ defmodule AssertHtmlTest do
     end
 
     test "check attributes", %{html: html} do
-      assert_html_attributes(html, ".foo", [id: "main"], fn(sub_html)->
+      assert_html_attributes(html, ".foo", [id: "main"], fn sub_html ->
         assert_html_attributes(sub_html, ".bar", text: "Text")
       end)
     end

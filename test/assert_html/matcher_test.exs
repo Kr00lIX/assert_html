@@ -41,7 +41,7 @@ defmodule AssertHtmlTest.MatcherTest do
     end
 
     test "expect check escaped text from `text` attribute", %{html: html} do
-      assert_attributes(html, "main", text: "quotes: \" & ' ")
+      assert_attributes(html, "main", text: "quotes: \" & '")
       assert_attributes(html, "main", text: ~r"quotes:")
     end
 

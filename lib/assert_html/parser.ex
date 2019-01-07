@@ -51,6 +51,7 @@ defmodule AssertHtml.Parser do
 
   @doc """
   Returns attribute value for a given selector.
+
   """
   @spec attribute(html_tree, String.t()) :: String.t() | nil
   def attribute(html, name) do
