@@ -3,16 +3,18 @@ defmodule AssertHtml.Selector do
 
   alias AssertHtml.Parser
 
-  @spec find(AssertHtml.html(), AssertHtml.css_selector()) :: nil | AssertHtml.html()
+  @spec find(AssertHtml.html(), AssertHtml.css_selector()) :: AssertHtml.html() | nil
   def find(html, css_selector) do
-    Parser.find(html, css_selector)
+    html
+    |> Parser.find(css_selector)
     |> Parser.to_html()
     |> case do
       "" -> nil
-      other -> other
+      other when is_binary(other) -> other
     end
   end
 
+  @spec attribute(AssertHtml.html(), AssertHtml.css_selector(), AssertHtml.attribute_name()) :: AssertHtml.html()
   def attribute(html, css_selector, name) do
     Parser.attribute(html, css_selector, name)
   end
@@ -21,7 +23,14 @@ defmodule AssertHtml.Selector do
     Parser.attribute(html, name)
   end
 
+  @doc ~S"""
+  Gets text from HTML element
+  """
+  @spec text(AssertHtml.html(), AssertHtml.css_selector()) :: String.t()
   def text(html, css_selector) do
-    Parser.find(html, css_selector) |> Parser.text() |> String.trim()
+    html
+    |> Parser.find(css_selector)
+    |> Parser.text()
+    |> String.trim()
   end
 end

@@ -2,6 +2,7 @@ defmodule AssertHtml.MixProject do
   use Mix.Project
 
   @version "0.0.1"
+  @github_url "https://github.com/Kr00lIX/assert_html"
 
   def project do
     [
@@ -12,16 +13,17 @@ defmodule AssertHtml.MixProject do
       deps: deps(),
 
       # Hex
-      description: "",
+      description: "ExUnit's assert helpers for testing rendered HTML backed by Floki.",
       package: package(),
 
       # Docs
       name: "AssertHTML",
+      source_url: @github_url,
       docs: docs(),
 
       # Test
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls": :test, "coveralls.travis": :test],
+      preferred_cli_env: [coveralls: :test, "coveralls.travis": :test],
 
       # dev
       dialyzer: [ignore_warnings: ".dialyzer_ignore.exs"]
@@ -40,10 +42,14 @@ defmodule AssertHtml.MixProject do
     [
       {:floki, ">= 0.20.3"},
 
+      # Test
       {:excoveralls, "~> 0.8", only: :test},
+      {:junit_formatter, "~> 2.1", only: :test},
+      {:credo, "~> 0.8", only: [:dev, :test]},
 
-      {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.17", only: :dev, runtime: false}
+      # Dev
+      {:dialyxir, "~> 1.0.0-rc.4", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
 
@@ -51,8 +57,9 @@ defmodule AssertHtml.MixProject do
     [
       main: "AssertHTML",
       source_ref: "v#{@version}",
-      extras: ["README.md"],
-      source_url: "https://github.com/Kr00lIX/assert_html"
+      extras: ["README.md", "CHANGELOG.md"],
+      source_url: @github_url,
+      deps: [Floki: "https://hexdocs.pm/floki/Floki.html"]
     ]
   end
 
@@ -62,10 +69,9 @@ defmodule AssertHtml.MixProject do
       package: "assert_html",
       contributors: ["Kr00lIX"],
       maintainers: ["Anatoliy Kovalchuk"],
-      links: %{github: "https://github.com/Kr00lIX/assert_html"},
+      links: %{"GitHub" => @github_url},
       licenses: ["LICENSE.md"],
-      files: ~w(lib LICENSE.md mix.exs README.md)
+      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md)
     }
   end
-
 end
