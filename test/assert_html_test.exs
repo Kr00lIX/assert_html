@@ -97,7 +97,7 @@ defmodule AssertHTMLTest do
 
     test "raise AssertionError for invalid selector", %{html: html} do
       message =
-        "\n\nElement `.container p p` not found.\n     \n               <div class=\"container\">\n                 <h1>Hello</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+        "\n\nElement `.container p p` not found.\n     \n     \t\n               <div class=\"container\">\n                 <h1>Hello</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_html_selector(html, ".container p p")
@@ -126,7 +126,7 @@ defmodule AssertHTMLTest do
 
     test "raise AssertionError for valid selector", %{html: html} do
       message =
-        "\n\nSelector `.container p` succeeded, but should have failed.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
+        "\n\nSelector `.container p` succeeded, but should have failed.\n     \n     \t\n               <div class=\"container\">\n                 <h1>Hello</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
 
       assert_raise ExUnit.AssertionError, message, fn ->
         refute_html_selector(html, ".container p")
@@ -165,7 +165,7 @@ defmodule AssertHTMLTest do
 
     test "raise AssertionError for invalid selector", %{html: html} do
       message =
-        "\n\nElement `.container p p` not found.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+        "\n\nElement `.container p p` not found.\n     \n     \t\n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_html_text(html, ".container p p", "Hello World")
@@ -173,7 +173,7 @@ defmodule AssertHTMLTest do
     end
 
     test "raise AssertionError for valid selector and invalid value", %{html: html} do
-      message = "\n\nComparison (using ==) failed in:\ncode:  \"Hello World\" == \"World\"\nleft:  \"Hello World\"\nright: \"World\"\n"
+      message = "\n\nComparison (using ==) failed in:\nleft:  \"Hello World\"\nright: \"World\"\n"
 
       assert_raise AssertionError, message, fn ->
         assert_html_text(html, "h1", "World")
@@ -210,7 +210,7 @@ defmodule AssertHTMLTest do
     end
 
     test "raise AssertionError for valid selector and valid value", %{html: html} do
-      message = "\n\nComparison (using !=) failed in:\ncode: \"Hello World\" != \"Hello World\"\n"
+      message = "\n\nComparison (using !=) failed in:\nleft:  \"Hello World\"\nright: \"Hello World\"\n"
 
       assert_raise AssertionError, message, fn ->
         refute_html_text(html, "h1", "Hello World")
@@ -239,7 +239,7 @@ defmodule AssertHTMLTest do
 
     test "raise AssertionError for invalid valid", %{html: html} do
       message =
-        "\n\nValue `Help me` not found.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+        "\n\nValue `Help me` not found.\n     \n     \t\n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_html_contains(html, "Help me")
@@ -267,7 +267,8 @@ defmodule AssertHTMLTest do
     end
 
     test "raise AssertionError for valid value", %{html: html} do
-      message = "\n\nValue `Hello World` found, but shouldn't.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+      message =
+        "\n\nValue `Hello World` found, but shouldn't.\n     \n     \t\n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n     \n"
 
       assert_raise AssertionError, message, fn ->
         refute_html_contains(html, "Hello World")
@@ -279,5 +280,4 @@ defmodule AssertHTMLTest do
       assert html == returns_html
     end
   end
-
 end

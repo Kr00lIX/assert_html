@@ -154,7 +154,7 @@ defmodule AssertHTML do
       ...> end
       %ExUnit.AssertionError{
         args: :ex_unit_no_meaningful_value,
-        expr: ~S("Header" == "HEADER"),
+        expr: :ex_unit_no_meaningful_value,
         left: "Header",
         message: "Comparison (using ==) failed in:",
         right: "HEADER"
@@ -220,5 +220,4 @@ defmodule AssertHTML do
     Matcher.assert_attributes(html, css_selector, attributes, subl_html_fn)
     html
   end
-
 end

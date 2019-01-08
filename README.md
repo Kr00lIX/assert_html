@@ -51,10 +51,14 @@ by adding `assert_html` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:assert_html, ">= 0.0.0", only: [:test]}
+    {:assert_html, ">= 0.0.1", only: [:test]}
   ]
 end
 ```
+
+## Contribution
+Feel free to send your PR with proposals, improvements or corrections 😉.
+
 
 ## License
 This software is licensed under the MIT license.

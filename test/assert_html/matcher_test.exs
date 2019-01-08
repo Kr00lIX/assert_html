@@ -12,7 +12,7 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "expect error for invalid selector", %{html: html} do
-      message = "\n\nElement `zzz ffff` not found.\n     <main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n"
+      message = "\n\nElement `zzz ffff` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_attributes(html, "zzz ffff", id: "foo")
@@ -20,7 +20,8 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "raise error for unexpected attribute", %{html: html} do
-      message = "\n\nAttribute `class` matched, but should haven't matched.\n     \n     <main class=\"table -vertical\">quotes: &quot; &amp; &apos;</main>.\n"
+      message =
+        "\n\nAttribute `class` matched, but should haven't matched.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &apos;</main>.\n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_attributes(html, "main", class: nil)
@@ -33,7 +34,7 @@ defmodule AssertHTMLTest.MatcherTest do
       assert_attributes(html, "main", class: "-vertical")
 
       message =
-        "\n\nClass `wrong_class` not found in `table -vertical` class attribute\n     \n     <main class=\"table -vertical\">quotes: &quot; &amp; &apos;</main>\n"
+        "\n\nClass `wrong_class` not found in `table -vertical` class attribute\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &apos;</main>\n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_attributes(html, "main", class: "wrong_class")
@@ -46,7 +47,7 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "expect error if attribute not exsists", %{html: html} do
-      message = "\n\nElement `form` not found.\n     <main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n"
+      message = "\n\nElement `form` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
 
       assert_raise AssertionError, message, fn ->
         assert_attributes(html, "form", id: "new_element")
@@ -54,12 +55,12 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "expect stringify values for checking attribuites" do
-      html =  ~S{<input id="zoo" value="111" />}
+      html = ~S{<input id="zoo" value="111" />}
       assert_attributes(html, "input", value: 111, id: "zoo")
     end
 
     test "check if attribute not exsists", %{html: html} do
-      html =  ~S{<input type="checkbox" value="111"  />}
+      html = ~S{<input type="checkbox" value="111"  />}
       assert_attributes(html, "input", type: "checkbox", checked: nil)
     end
   end
