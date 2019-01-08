@@ -1,9 +1,9 @@
-defmodule AssertHtml do
+defmodule AssertHTML do
   @moduledoc """
-  Documentation for AssertHtml.
+  Documentation for AssertHTML.
   """
 
-  alias AssertHtml.{Matcher, Selector}
+  alias AssertHTML.{Matcher, Selector}
 
   @typedoc ~S"""
   CSS selector
@@ -48,6 +48,12 @@ defmodule AssertHtml do
   @type attribute_name :: String.t() | atom()
 
   @typep value :: String.t()
+
+  defmacro __using__(_opts) do
+    quote do
+      import AssertHTML
+    end
+  end
 
   @doc ~S"""
   Returns part of HTML by CSS selector
@@ -122,21 +128,15 @@ defmodule AssertHtml do
     html
   end
 
+  @spec refute_html_text(html, value) :: html | no_return
+  def refute_html_text(html, value) do
+    Matcher.match_text(:refute, html, value)
+    html
+  end
+
   @spec refute_html_text(html, css_selector, value) :: html | no_return
   def refute_html_text(html, css_selector, value) do
     Matcher.match_text(:refute, html, css_selector, value)
-    html
-  end
-
-  @spec assert_match_html_text(html, value) :: html | no_return
-  def assert_match_html_text(html, value) do
-    Matcher.match_text(:assert, html, value)
-    html
-  end
-
-  @spec refute_match_html_text(html, css_selector, value) :: html | no_return
-  def refute_match_html_text(html, css_selector, value) do
-    Matcher.match_text(:refute, css_selector, value)
     html
   end
 
@@ -152,9 +152,4 @@ defmodule AssertHtml do
     html
   end
 
-  @spec refute_html_text(html, value) :: html | no_return
-  def refute_html_text(html, value) do
-    Matcher.match_text(:refute, html, value)
-    html
-  end
 end

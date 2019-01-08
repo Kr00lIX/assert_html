@@ -1,12 +1,12 @@
-defmodule AssertHtml.Matcher do
+defmodule AssertHTML.Matcher do
   @moduledoc false
 
-  alias AssertHtml
-  alias AssertHtml.{Parser, Selector}
+  alias AssertHTML
+  alias AssertHTML.{Parser, Selector}
 
   @typep assert_or_refute :: :assert | :refute
 
-  @spec selector(assert_or_refute, AssertHtml.html(), AssertHtml.css_selector()) :: no_return()
+  @spec selector(assert_or_refute, AssertHTML.html(), AssertHTML.css_selector()) :: no_return()
   def selector(matcher, html, selector) do
     doc = Parser.find(html, selector)
 

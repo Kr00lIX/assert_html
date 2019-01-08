@@ -1,4 +1,4 @@
-defmodule AssertHtml.Parser do
+defmodule AssertHTML.Parser do
   @moduledoc false
 
   @typep html_element_tuple :: binary() | [any()] | tuple()
@@ -36,12 +36,12 @@ defmodule AssertHtml.Parser do
 
       {tag_name, attributes, children_nodes}
   """
-  @spec find(html_tree, AssertHtml.css_selector()) :: html_tree
+  @spec find(html_tree, AssertHTML.css_selector()) :: html_tree
   def find(html, selector) do
     Floki.find(html, selector)
   end
 
-  @spec attribute(html_tree, AssertHtml.css_selector(), String.t()) :: String.t() | nil
+  @spec attribute(html_tree, AssertHTML.css_selector(), String.t()) :: String.t() | nil
   def attribute(html, selector, name) do
     case Floki.attribute(html, selector, name) do
       [value] -> value

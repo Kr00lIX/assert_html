@@ -1,7 +1,7 @@
-defmodule AssertHtmlTest.MatcherTest do
+defmodule AssertHTMLTest.MatcherTest do
   use ExUnit.Case, async: true
-  doctest AssertHtml.Matcher, import: true
-  import AssertHtml.Matcher
+  doctest AssertHTML.Matcher, import: true
+  import AssertHTML.Matcher
   alias ExUnit.AssertionError
 
   describe ".assert_attributes/4" do

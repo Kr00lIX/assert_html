@@ -1,9 +1,9 @@
-defmodule AssertHtml.Selector do
+defmodule AssertHTML.Selector do
   @moduledoc false
 
-  alias AssertHtml.Parser
+  alias AssertHTML.Parser
 
-  @spec find(AssertHtml.html(), AssertHtml.css_selector()) :: AssertHtml.html() | nil
+  @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
   def find(html, css_selector) do
     html
     |> Parser.find(css_selector)
@@ -14,7 +14,7 @@ defmodule AssertHtml.Selector do
     end
   end
 
-  @spec attribute(AssertHtml.html(), AssertHtml.css_selector(), AssertHtml.attribute_name()) :: AssertHtml.html()
+  @spec attribute(AssertHTML.html(), AssertHTML.css_selector(), AssertHTML.attribute_name()) :: AssertHTML.html()
   def attribute(html, css_selector, "text") do
     text(html, css_selector)
   end
@@ -35,7 +35,7 @@ defmodule AssertHtml.Selector do
   @doc ~S"""
   Gets text from HTML element
   """
-  @spec text(AssertHtml.html(), AssertHtml.css_selector()) :: String.t()
+  @spec text(AssertHTML.html(), AssertHTML.css_selector()) :: String.t()
   def text(html, css_selector) do
     html
     |> Parser.find(css_selector)
@@ -45,7 +45,7 @@ defmodule AssertHtml.Selector do
   @doc ~S"""
   Gets text from HTML element
   """
-  @spec text(AssertHtml.html()) :: String.t()
+  @spec text(AssertHTML.html()) :: String.t()
   def text(html) do
     html
     |> Parser.text()

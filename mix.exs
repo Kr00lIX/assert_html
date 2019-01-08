@@ -1,4 +1,4 @@
-defmodule AssertHtml.MixProject do
+defmodule AssertHTML.MixProject do
   use Mix.Project
 
   @version "0.0.1"
@@ -18,7 +18,7 @@ defmodule AssertHtml.MixProject do
 
       # Docs
       name: "AssertHTML",
-      source_url: @github_url,
+      # source_url: @github_url,
       docs: docs(),
 
       # Test

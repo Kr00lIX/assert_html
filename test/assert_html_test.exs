@@ -1,7 +1,7 @@
-defmodule AssertHtmlTest do
+defmodule AssertHTMLTest do
   use ExUnit.Case, async: true
-  doctest AssertHtml, import: true
-  import AssertHtml
+  doctest AssertHTML, import: true
+  import AssertHTML
   alias ExUnit.AssertionError
 
   describe ".html_selector" do
