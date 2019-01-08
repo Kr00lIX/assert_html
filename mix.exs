@@ -18,7 +18,7 @@ defmodule AssertHTML.MixProject do
 
       # Docs
       name: "AssertHTML",
-      # source_url: @github_url,
+      source_url: @github_url,
       docs: docs(),
 
       # Test

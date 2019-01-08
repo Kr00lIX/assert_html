@@ -2,9 +2,6 @@
 
 ## Unreleased
 
-## 0.0.1
-  Release first version
-
 ### Added
 - Allow use Regexp for checking attribute value
 - Add `assert_attributes(html, selector, [id: "name"], fn(sub_html)->   end)` callback with selected html

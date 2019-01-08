@@ -3,7 +3,6 @@
 AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
 
 
-
 ## Usage
 ```elixir
 defmodule ExampleControllerTest do
@@ -29,6 +28,21 @@ end
 
 See [HexDocs](https://hexdocs.pm/Kr00lIX/assert_html.html) for additional documentation.
 
+## Helpers Available
+
+- `assert_attributes(html, selector, [id: "name"], fn(sub_html)->   end)`
+- `assert_html_selector(html, css_selector)`  
+- `refute_html_selector((html, css_selector, value)`
+- `assert_html_text(html, value)`  
+- `assert_html_text(html, css_selector, value)`
+- `refute_html_text(html, value)` 
+- `refute_html_text((html, css_selector, value)`
+- `html_selector(html, css_selector)` 
+- `html_attribute(html, css_selector)`  
+- `html_attribute(html, css_selector, name)`
+- `html_text(html, css_selector)` 
+
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
@@ -41,8 +55,6 @@ def deps do
   ]
 end
 ```
-
-
 
 ## License
 This software is licensed under the MIT license.
