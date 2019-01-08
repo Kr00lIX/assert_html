@@ -165,7 +165,7 @@ defmodule AssertHTMLTest do
 
     test "raise AssertionError for invalid selector", %{html: html} do
       message =
-        "\n\nElement `.container p p` not found.\n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+        "\n\nElement `.container p p` not found.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
 
       assert_raise AssertionError, message, fn ->
         assert_html_text(html, ".container p p", "Hello World")

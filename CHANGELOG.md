@@ -4,6 +4,7 @@
 
 ## Fixed
 - Checking attributes with non sting values
+- Check no existing attributes `attribute_name: nil`
 
 ### Added
 - Add `assert_html_contains(html, value)` and `refute_html_contains(html, value)` checkers

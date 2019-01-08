@@ -19,7 +19,8 @@ defmodule AssertHTML.Matcher do
   end
 
   def contain(matcher, html, value) do
-    raise_match(matcher, !String.contains?(html, value), fn
+    str_value = to_string(value)
+    raise_match(matcher, !String.contains?(html, str_value), fn
       :assert -> "Value `#{value}` not found.\n\n#{html}"
       :refute -> "Value `#{value}` found, but shouldn't.\n\n#{html}"
     end)
@@ -31,7 +32,7 @@ defmodule AssertHTML.Matcher do
     # ignore if element not found for :refute
     if matcher == :assert do
       raise_match(matcher, doc == [], fn _matcher ->
-        "Element `#{selector}` not found.\n#{html}"
+        "Element `#{selector}` not found.\n\n#{html}"
       end)
     end
 
@@ -70,8 +71,8 @@ defmodule AssertHTML.Matcher do
       attr_value = Selector.attribute(html_tree, attr)
 
       case {attr, check_value, attr_value} do
-        {_attr, nil, attr_value} when attr_value != nil ->
-          assert_error("Attribute `#{attr}` matched, but should haven't matched.\n\n#{html_element}.")
+        {_attr, nil, attr_value} ->
+          raise_match(attr_value != nil, fn _ -> "Attribute `#{attr}` matched, but should haven't matched.\n\n#{html_element}." end)
 
         {attr, _check_value, nil} ->
           assert_error("Attribute `#{attr}` not found.\n\n#{html_element}")

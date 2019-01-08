@@ -57,6 +57,11 @@ defmodule AssertHTMLTest.MatcherTest do
       html =  ~S{<input id="zoo" value="111" />}
       assert_attributes(html, "input", value: 111, id: "zoo")
     end
+
+    test "check if attribute not exsists", %{html: html} do
+      html =  ~S{<input type="checkbox" value="111"  />}
+      assert_attributes(html, "input", type: "checkbox", checked: nil)
+    end
   end
 
   describe ".contain" do
