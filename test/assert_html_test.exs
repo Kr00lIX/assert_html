@@ -222,4 +222,62 @@ defmodule AssertHTMLTest do
       assert html == returns_html
     end
   end
+
+  describe ".assert_html_contains" do
+    setup do
+      [
+        html: ~S{
+          <div class="container">
+            <h1>Hello World</h1>
+            <p class="descripition">
+              Paragraph
+            </p>
+          </div>
+        }
+      ]
+    end
+
+    test "raise AssertionError for invalid valid", %{html: html} do
+      message =
+        "\n\nValue `Help me` not found.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+
+      assert_raise AssertionError, message, fn ->
+        assert_html_contains(html, "Help me")
+      end
+    end
+
+    test "do not raise exception for valid selector", %{html: html} do
+      returns_html = assert_html_contains(html, "Hello World")
+      assert html == returns_html
+    end
+  end
+
+  describe ".refute_html_contains" do
+    setup do
+      [
+        html: ~S{
+          <div class="container">
+            <h1>Hello World</h1>
+            <p class="descripition">
+              Paragraph
+            </p>
+          </div>
+        }
+      ]
+    end
+
+    test "raise AssertionError for valid value", %{html: html} do
+      message = "\n\nValue `Hello World` found, but shouldn't.\n     \n     \n               <div class=\"container\">\n                 <h1>Hello World</h1>\n                 <p class=\"descripition\">\n                   Paragraph\n                 </p>\n               </div>\n             \n"
+
+      assert_raise AssertionError, message, fn ->
+        refute_html_contains(html, "Hello World")
+      end
+    end
+
+    test "do not raise exception for  invalid value", %{html: html} do
+      returns_html = refute_html_contains(html, "Hugs")
+      assert html == returns_html
+    end
+  end
+
 end

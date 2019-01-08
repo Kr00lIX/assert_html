@@ -52,5 +52,21 @@ defmodule AssertHTMLTest.MatcherTest do
         assert_attributes(html, "form", id: "new_element")
       end
     end
+
+    test "expect stringify values for checking attribuites" do
+      html =  ~S{<input id="zoo" value="111" />}
+      assert_attributes(html, "input", value: 111, id: "zoo")
+    end
+  end
+
+  describe ".contain" do
+    setup do
+      [html: ~S{<div><p>Merry Christmas</p></div>}]
+    end
+
+    test "expect check value", %{html: html} do
+      contain(:assert, html, "Merry Christmas")
+      contain(:assert, html, "<p>Merry Christmas")
+    end
   end
 end

@@ -18,7 +18,14 @@ defmodule AssertHTML.Matcher do
     doc
   end
 
-  def match_text(matcher, html, selector, value) do
+  def contain(matcher, html, value) do
+    raise_match(matcher, !String.contains?(html, value), fn
+      :assert -> "Value `#{value}` not found.\n\n#{html}"
+      :refute -> "Value `#{value}` found, but shouldn't.\n\n#{html}"
+    end)
+  end
+
+  def text(matcher, html, selector, value) do
     doc = Parser.find(html, selector)
 
     # ignore if element not found for :refute
@@ -29,10 +36,10 @@ defmodule AssertHTML.Matcher do
     end
 
     selected_html = Parser.to_html(doc)
-    match_text(matcher, selected_html, value)
+    text(matcher, selected_html, value)
   end
 
-  def match_text(matcher, html_element, %Regex{} = value) do
+  def text(matcher, html_element, %Regex{} = value) do
     text = Parser.text(html_element)
 
     raise_match(matcher, !Regex.match?(value, text), fn
@@ -44,7 +51,7 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  def match_text(matcher, html, value) do
+  def text(matcher, html, value) do
     text = Parser.text(html)
 
     raise_match(matcher, text != value, fn
@@ -87,11 +94,12 @@ defmodule AssertHTML.Matcher do
           end)
 
         {attribute, check_value, attr_value} ->
-          raise_match(check_value != attr_value, fn _ ->
+          str_check_value = to_string check_value
+          raise_match(str_check_value != attr_value, fn _ ->
             [
               message: "Comparison `#{attribute}` attribute failed.\n\n#{html_element}.",
-              expr: "#{inspect(check_value)} == #{inspect(attr_value)}",
-              left: check_value,
+              expr: "#{inspect(str_check_value)} == #{inspect(attr_value)}",
+              left: str_check_value,
               right: attr_value
             ]
           end)

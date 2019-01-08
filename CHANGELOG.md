@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## Fixed
+- Checking attributes with non sting values
+
+### Added
+- Add `assert_html_contains(html, value)` and `refute_html_contains(html, value)` checkers
+
+
+## v0.0.1
+
 ### Added
 - Allow use Regexp for checking attribute value
 - Add `assert_attributes(html, selector, [id: "name"], fn(sub_html)->   end)` callback with selected html

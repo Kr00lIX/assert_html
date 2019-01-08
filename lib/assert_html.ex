@@ -50,7 +50,7 @@ defmodule AssertHTML do
   @typep value :: String.t()
 
   defmacro __using__(_opts) do
-    quote do
+    quote location: :keep do
       import AssertHTML
     end
   end
@@ -163,7 +163,7 @@ defmodule AssertHTML do
   """
   @spec assert_html_text(html, value) :: html | no_return
   def assert_html_text(html, value) do
-    Matcher.match_text(:assert, html, value)
+    Matcher.text(:assert, html, value)
     html
   end
 
@@ -183,19 +183,29 @@ defmodule AssertHTML do
   """
   @spec assert_html_text(html, css_selector, value) :: html | no_return
   def assert_html_text(html, css_selector, value) do
-    Matcher.match_text(:assert, html, css_selector, value)
+    Matcher.text(:assert, html, css_selector, value)
+    html
+  end
+
+  def assert_html_contains(html, value) do
+    Matcher.contain(:assert, html, value)
+    html
+  end
+
+  def refute_html_contains(html, value) do
+    Matcher.contain(:refute, html, value)
     html
   end
 
   @spec refute_html_text(html, value) :: html | no_return
   def refute_html_text(html, value) do
-    Matcher.match_text(:refute, html, value)
+    Matcher.text(:refute, html, value)
     html
   end
 
   @spec refute_html_text(html, css_selector, value) :: html | no_return
   def refute_html_text(html, css_selector, value) do
-    Matcher.match_text(:refute, html, css_selector, value)
+    Matcher.text(:refute, html, css_selector, value)
     html
   end
 
