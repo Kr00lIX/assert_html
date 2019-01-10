@@ -49,11 +49,49 @@ defmodule AssertHTML do
 
   @typep value :: String.t()
 
+  # use macro definition
   defmacro __using__(_opts) do
     quote location: :keep do
-      import AssertHTML
-      import AssertHTML.MacroDSL
+      import AssertHTML.DSL
+      # import AssertHTML
     end
+  end
+
+
+  def assert_html(context, selector \\ nil, attributes \\ nil, inside_fn \\ nil) do
+    # [context: context, selector: selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "assert_html")
+
+    html(:assert, context, selector, attributes, inside_fn)
+  end
+
+  @spec refute_html(any(), any(), any(), false | nil | (any() -> any())) :: any()
+  def refute_html(context, selector \\ nil, attributes \\ nil, inside_fn \\ nil) do
+    # [context: context, selector: selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "refute_html")
+
+    html(:refute, context, selector, attributes, inside_fn)
+  end
+
+
+  defp html(matcher, context, css_selector, attributes, inside_fn) do
+    [matcher: matcher, context: context, selector: css_selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "html")
+
+    sub_context =
+      if css_selector do
+        Selector.find(context, css_selector)
+        # match!
+      else
+        context
+      end
+
+    if attributes do
+      # check attributes sub_context
+    end
+
+    # call inside block
+    if inside_fn do
+      inside_fn.(sub_context)
+    end
+    context
   end
 
 

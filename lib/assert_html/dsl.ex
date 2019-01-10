@@ -1,31 +1,31 @@
-defmodule AssertHTML.MacroDSL do
-  # import AssertHTML
+defmodule AssertHTML.DSL do
 
-  alias AssertHTML.MacroDSL, as: DSL
+  alias AssertHTML, as: HTML
 
-  defmacro assert_html(context, selector \\ nil, attributes \\ [], maybe_do_block \\ nil) do
-    [html: context, selector: selector, attributes: attributes, maybe_do_block: maybe_do_block] |> IO.inspect(label: "assert_html")
+  defmacro assert_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
+    # [html: context, selector: selector, attributes: attributes, maybe_do_block: maybe_do_block] |> IO.inspect(label: "assert_html")
 
     {args, block} = extract_block([context, selector, attributes], maybe_do_block)
     result = do_assert_html(args, block)
-    IO.puts "\n\n~~~~>>>>>      #{Macro.to_string(result) } \n\n"
+    IO.puts "\n\n~~~~>>>>>      \n#{Macro.to_string(result) } \n<<<<<  ~~\n"
     result
   end
 
+  defp do_assert_html(args, block \\ nil)
   defp do_assert_html(args, nil) do
     quote do
-      assert_html_attributes(unquote_splicing(args))
+      HTML.assert_html(unquote_splicing(args))
     end
   end
   defp do_assert_html(args, block) do
     block_arg =
       quote do
-        fn(html)->
+        fn(unquote(context_var()))->
           unquote(Macro.prewalk(block, &postwalk/1))
         end
       end
 
-    args ++ [block_arg]
+    do_assert_html(args ++ [block_arg])
   end
 
   # found do: block if exists
@@ -37,16 +37,21 @@ defmodule AssertHTML.MacroDSL do
     |> Enum.map_reduce(nil, fn
       arg, acc when is_list(arg) ->
         {maybe_block, updated_arg} = Keyword.pop(arg, :do)
-        {updated_arg, acc || maybe_block}
+        new_arg = if updated_arg == [], do: nil, else: updated_arg
+
+        {new_arg, acc || maybe_block}
       arg, acc ->
         {arg, acc}
     end)
   end
 
+  # replace assert_html without arguments to context
+  def postwalk({:assert_html, env, nil}) do
+    context_var(env)
+  end
   def postwalk({:assert_html, env, arguments}) do
-    context = {:html, env, nil}
-    updated_arguments = [context | arguments]
-    {args, block} = extract_block(updated_arguments, [])
+    context = context_var(env)
+    {args, block} = extract_block([context | arguments], nil)
 
     # {args, block} |> IO.inspect(label: "updated_arguments")
 
@@ -62,6 +67,10 @@ defmodule AssertHTML.MacroDSL do
     if arg4 do
       arg4.(arg1)
     end
+  end
+
+  defp context_var(env \\ []) do
+    {:assert_html_context, env, nil}
   end
 
 end
