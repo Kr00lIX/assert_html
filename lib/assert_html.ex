@@ -52,8 +52,10 @@ defmodule AssertHTML do
   defmacro __using__(_opts) do
     quote location: :keep do
       import AssertHTML
+      import AssertHTML.MacroDSL
     end
   end
+
 
   @doc ~S"""
   Returns part of HTML by CSS selector
