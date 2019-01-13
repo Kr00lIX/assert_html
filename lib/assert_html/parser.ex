@@ -63,7 +63,7 @@ defmodule AssertHTML.Parser do
 
   @spec text(html_tree) :: String.t()
   def text(html_element_tuple) do
-    Floki.text(html_element_tuple)
+    Floki.text(html_element_tuple, deep: false)
   end
 
   @spec to_html(html_tree) :: String.t()

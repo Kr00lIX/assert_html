@@ -53,38 +53,67 @@ defmodule AssertHTML do
   defmacro __using__(_opts) do
     quote location: :keep do
       import AssertHTML.DSL
-      # import AssertHTML
+      import AssertHTML, except: [
+          assert_html: 2, assert_html: 3, assert_html: 4,
+          refute_html: 2, refute_html: 3, refute_html: 4
+        ]
     end
   end
 
-
-  def assert_html(context, selector \\ nil, attributes \\ nil, inside_fn \\ nil) do
-    # [context: context, selector: selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "assert_html")
-
-    html(:assert, context, selector, attributes, inside_fn)
+  @doc """
+  """
+  def assert_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
+    html(:assert, html, css_selector)
+  end
+  def assert_html(html, attributes) when is_binary(html) and is_list(attributes) do
+    html(:assert, html, nil, attributes)
+  end
+  def assert_html(html, inside_fn) when is_binary(html) and is_function(inside_fn) do
+    html(:assert, html, nil, nil, inside_fn)
   end
 
-  @spec refute_html(any(), any(), any(), false | nil | (any() -> any())) :: any()
-  def refute_html(context, selector \\ nil, attributes \\ nil, inside_fn \\ nil) do
-    # [context: context, selector: selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "refute_html")
-
-    html(:refute, context, selector, attributes, inside_fn)
+  def assert_html(html, attributes, inside_fn) when is_binary(html) and is_list(attributes) and is_function(inside_fn) do
+    html(:assert, html, nil, attributes, inside_fn)
+  end
+  def assert_html(html, css_selector, inside_fn) when is_binary(html) and is_binary(css_selector) and is_function(inside_fn) do
+    html(:assert, html, css_selector, nil, inside_fn)
+  end
+  def assert_html(html, css_selector, attributes, inside_fn \\ nil) do
+    html(:assert, html, css_selector, attributes, inside_fn)
   end
 
+  def refute_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
+    html(:refute, html, css_selector)
+  end
+  def refute_html(html, attributes) when is_binary(html) and is_list(attributes) do
+    html(:refute, html, nil, attributes)
+  end
+  def refute_html(html, inside_fn) when is_binary(html) and is_function(inside_fn) do
+    html(:refute, html, nil, nil, inside_fn)
+  end
+  def refute_html(html, attributes, inside_fn) when is_binary(html) and is_list(attributes) and is_function(inside_fn) do
+    html(:refute, html, nil, attributes, inside_fn)
+  end
+  def refute_html(html, css_selector, inside_fn) when is_binary(html) and is_binary(css_selector) and is_function(inside_fn) do
+    html(:refute, html, css_selector, nil, inside_fn)
+  end
+  def refute_html(html, css_selector, attributes, inside_fn \\ nil) when is_binary(html) and is_binary(css_selector) do
+    html(:refute, html, css_selector, attributes, inside_fn)
+  end
 
-  defp html(matcher, context, css_selector, attributes, inside_fn) do
-    [matcher: matcher, context: context, selector: css_selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "html")
+  defp html(matcher, context, css_selector, attributes \\ nil, inside_fn \\ nil) do
+    # [matcher: matcher, context: context, css_selector: css_selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "html")
 
     sub_context =
-      if css_selector do
-        Selector.find(context, css_selector)
-        # match!
+      if css_selector != nil do
+        Matcher.selector(matcher, context, css_selector)
       else
         context
       end
 
     if attributes do
       # check attributes sub_context
+      Matcher.attributes(sub_context, attributes)
     end
 
     # call inside block
@@ -94,170 +123,4 @@ defmodule AssertHTML do
     context
   end
 
-
-  @doc ~S"""
-  Returns part of HTML by CSS selector
-
-  ## Examples
-      iex> html = ~S{ <p><div class="foo"><h1>Header</h1</div></p>  }
-      ...> html_selector(html, "p .foo")
-      ~S{<div class="foo"><h1>Header</h1></div>}
-
-      iex> html = ~S{ <p><div class="foo"><h1>Header</h1</div></p>  }
-      ...> html_selector(html, "h1")
-      "<h1>Header</h1>"
-  """
-  @spec html_selector(html, css_selector) :: html | nil
-  def html_selector(html, css_selector) do
-    Selector.find(html, css_selector)
-  end
-
-  @doc ~S"""
-  Gets an element’s attribute value
-
-  Returns nil if attribute not found
-
-  ## Examples
-
-  ```elixir
-  iex> html_attribute(~S{<div class="foo bar">text</div>}, "class")
-  "foo bar"
-
-  iex> html_attribute(~S{<div>text</div>}, "id")
-  nil
-
-  iex> html = ~S{<div class="foo">Some &amp; text</div>}
-  ...> html_attribute(html, "text")
-  "Some & text"
-  ```
-  """
-  @spec html_attribute(html, attribute_name) :: value | nil
-  def html_attribute(html, attribute_name) do
-    Selector.attribute(html, attribute_name)
-  end
-
-  @doc """
-  Gets an element’s attribute value via CSS selector
-
-  ```elixir
-  iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
-  ...> html_attribute(html, ".zoo", "class")
-  "zoo bar"
-  ```
-  """
-  @spec html_attribute(html, css_selector, attribute_name) :: value | nil
-  def html_attribute(html, css_selector, name) do
-    Selector.attribute(html, css_selector, name)
-  end
-
-  @doc """
-  Gets text from HTML element
-
-  ## Examples
-
-  ```elixir
-  iex> html = ~S{<div class="container">   <h1 class="title">Header</h1>   </div>}
-  ...> html_text(html, ".title")
-  "Header"
-  ```
-  """
-  @spec html_text(html, css_selector) :: String.t() | nil
-  def html_text(html, css_selector) do
-    Selector.text(html, css_selector)
-  end
-
-  @doc """
-  Asserts an element in HTML
-
-  Raise error if selector not found
-  """
-  @spec assert_html_selector(html, css_selector) :: html | no_return
-  def assert_html_selector(html, css_selector) do
-    Matcher.selector(:assert, html, css_selector)
-    html
-  end
-
-  @doc """
-  Asserts an text element in HTML
-
-  ## Examples
-
-      iex> html = ~S{<h1 class="title">Header</h1>}
-      ...> assert_html_text(html, "Header")
-      ~S{<h1 class="title">Header</h1>}
-
-      iex> html = ~S{<h1 class="title">Header</h1>}
-      ...> try do
-      ...>   assert_html_text(html, "HEADER")
-      ...> rescue
-      ...>   e in ExUnit.AssertionError -> e
-      ...> end
-      %ExUnit.AssertionError{
-        args: :ex_unit_no_meaningful_value,
-        expr: :ex_unit_no_meaningful_value,
-        left: "Header",
-        message: "Comparison (using ==) failed in:",
-        right: "HEADER"
-      }
-
-  """
-  @spec assert_html_text(html, value) :: html | no_return
-  def assert_html_text(html, value) do
-    Matcher.text(:assert, html, value)
-    html
-  end
-
-  @doc """
-  Asserts an text element in HTML
-
-  ## Examples
-
-      iex> html = ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
-      ...> assert_html_text(html, "h1", "Hello World") == html
-      true
-
-      iex> html = ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
-      ...> assert_html_text(html, ".title", ~r{World})
-      ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
-
-  """
-  @spec assert_html_text(html, css_selector, value) :: html | no_return
-  def assert_html_text(html, css_selector, value) do
-    Matcher.text(:assert, html, css_selector, value)
-    html
-  end
-
-  def assert_html_contains(html, value) do
-    Matcher.contain(:assert, html, value)
-    html
-  end
-
-  def refute_html_contains(html, value) do
-    Matcher.contain(:refute, html, value)
-    html
-  end
-
-  @spec refute_html_text(html, value) :: html | no_return
-  def refute_html_text(html, value) do
-    Matcher.text(:refute, html, value)
-    html
-  end
-
-  @spec refute_html_text(html, css_selector, value) :: html | no_return
-  def refute_html_text(html, css_selector, value) do
-    Matcher.text(:refute, html, css_selector, value)
-    html
-  end
-
-  @spec refute_html_selector(html, css_selector) :: html | no_return
-  def refute_html_selector(html, css_selector) do
-    Matcher.selector(:refute, html, css_selector)
-    html
-  end
-
-  @spec assert_html_attributes(html, css_selector, attributes, fun | nil) :: html | no_return
-  def assert_html_attributes(html, css_selector, attributes, subl_html_fn \\ nil) do
-    Matcher.assert_attributes(html, css_selector, attributes, subl_html_fn)
-    html
-  end
 end

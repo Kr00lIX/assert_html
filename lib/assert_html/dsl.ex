@@ -3,21 +3,31 @@ defmodule AssertHTML.DSL do
   alias AssertHTML, as: HTML
 
   defmacro assert_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
-    # [html: context, selector: selector, attributes: attributes, maybe_do_block: maybe_do_block] |> IO.inspect(label: "assert_html")
-
     {args, block} = extract_block([context, selector, attributes], maybe_do_block)
-    result = do_assert_html(args, block)
+    result = call_html_method(:assert, args, block)
     IO.puts "\n\n~~~~>>>>>      \n#{Macro.to_string(result) } \n<<<<<  ~~\n"
     result
   end
 
-  defp do_assert_html(args, block \\ nil)
-  defp do_assert_html(args, nil) do
+  defmacro refute_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
+    {args, block} = extract_block([context, selector, attributes], maybe_do_block)
+    result = call_html_method(:refute, args, block)
+    IO.puts "\n\n~~~~>>>>>      \n#{Macro.to_string(result) } \n<<<<<  ~~\n"
+    result
+  end
+
+  defp call_html_method(matcher, args, block \\ nil)
+  defp call_html_method(:assert, args, nil) do
     quote do
       HTML.assert_html(unquote_splicing(args))
     end
   end
-  defp do_assert_html(args, block) do
+  defp call_html_method(:refute, args, nil) do
+    quote do
+      HTML.refute_html(unquote_splicing(args))
+    end
+  end
+  defp call_html_method(matcher, args, block) do
     block_arg =
       quote do
         fn(unquote(context_var()))->
@@ -25,7 +35,7 @@ defmodule AssertHTML.DSL do
         end
       end
 
-    do_assert_html(args ++ [block_arg])
+    call_html_method(matcher, args ++ [block_arg])
   end
 
   # found do: block if exists
@@ -53,12 +63,19 @@ defmodule AssertHTML.DSL do
     context = context_var(env)
     {args, block} = extract_block([context | arguments], nil)
 
-    # {args, block} |> IO.inspect(label: "updated_arguments")
+    call_html_method(:assert, args, block)
+  end
+  # replace refute_html without arguments to context
+  def postwalk({:refute_html, env, nil}) do
+    context_var(env)
+  end
+  def postwalk({:refute_html, env, arguments}) do
+    context = context_var(env)
+    {args, block} = extract_block([context | arguments], nil)
 
-    do_assert_html(args, block)
+    call_html_method(:refute, args, block)
   end
   def postwalk(segment) do
-    # IO.inspect(segment, label: "segment")
     segment
   end
 

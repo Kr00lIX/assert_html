@@ -14,22 +14,15 @@ defmodule AssertHTML.Selector do
     end
   end
 
-  @spec attribute(AssertHTML.html(), AssertHTML.css_selector(), AssertHTML.attribute_name()) :: AssertHTML.html()
-  def attribute(html, css_selector, "text") do
-    text(html, css_selector)
+  @spec attribute(AssertHTML.html(), AssertHTML.attribute_name()) :: AssertHTML.html()
+  def attribute(html, attribute_name) when is_atom(attribute_name) do
+    attribute(html, to_string(attribute_name))
   end
-
-  def attribute(html, css_selector, name) do
-    Parser.attribute(html, css_selector, name)
-  end
-
   def attribute(html, "text") do
     text(html)
   end
-
-  def attribute(html, name) do
-    html
-    |> Parser.attribute(name)
+  def attribute(html, attribute_name) when is_binary(html) and is_binary(attribute_name) do
+    Parser.attribute(html, attribute_name)
   end
 
   @doc ~S"""
@@ -51,4 +44,8 @@ defmodule AssertHTML.Selector do
     |> Parser.text()
     |> String.trim()
   end
+
+  ####################################################################
+
+
 end

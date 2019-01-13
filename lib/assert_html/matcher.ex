@@ -8,19 +8,62 @@ defmodule AssertHTML.Matcher do
 
   @typep assert_or_refute :: :assert | :refute
 
-
-
-
   @spec selector(assert_or_refute, AssertHTML.html(), AssertHTML.css_selector()) :: no_return()
   def selector(matcher, html, selector) do
-    doc = Parser.find(html, selector)
+    sub_html = Selector.find(html, selector)
 
-    raise_match(matcher, doc == [], fn
+    raise_match(matcher, sub_html == nil, fn
       :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
       :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
     end)
+    sub_html
+  end
 
-    doc
+  def attributes(html, attributes) do
+    attributes
+    |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
+    |> Enum.each(fn {attribute, check_value} ->
+      attr_value = Selector.attribute(html, attribute)
+
+      case {attribute, check_value, attr_value} do
+        {_attribute, nil, attr_value} ->
+          raise_match(attr_value != nil, fn _ -> "Attribute `#{attribute}` matched, but should haven't matched.\n\n\t#{html}.\n" end)
+
+        {attribute, _check_value, nil} ->
+          assert_error("Attribute `#{attribute}` not found.\n\n\t#{html}\n")
+
+        {_attribute, true, _attr_value} ->
+          # attribute exists
+          :ok
+
+        {attribute, %Regex{}=check_value, attr_value} ->
+          raise_match(!Regex.match?(check_value, attr_value), fn _ ->
+            [
+              message: "Matching `#{attribute}` attribute failed.\n\n\t#{html}.\n",
+              left: check_value,
+              right: attr_value
+            ]
+          end)
+
+        {"class", check_value, attr_value} ->
+          for check_class <- String.split(to_string(check_value), " ") do
+            raise_match(!String.contains?(attr_value, check_class), fn _ ->
+              "Class `#{check_class}` not found in `#{attr_value}` class attribute\n\n\t#{html}\n"
+            end)
+          end
+
+        {attribute, check_value, attr_value} ->
+          str_check_value = to_string(check_value)
+
+          raise_match(str_check_value != attr_value, fn _ ->
+            [
+              message: "Comparison `#{attribute}` attribute failed.\n\n\t#{html}.\n",
+              left: str_check_value,
+              right: attr_value
+            ]
+          end)
+      end
+    end)
   end
 
   def contain(matcher, html, value) do
@@ -46,6 +89,7 @@ defmodule AssertHTML.Matcher do
     text(matcher, selected_html, value)
   end
 
+  @spec text(:assert | :refute, binary() | [any()] | tuple(), any()) :: nil
   def text(matcher, html_element, %Regex{} = value) do
     text = Parser.text(html_element)
 
@@ -55,6 +99,7 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
+  # need?
   def text(matcher, html, value) do
     text = Parser.text(html)
 
@@ -62,56 +107,6 @@ defmodule AssertHTML.Matcher do
       :assert -> [left: text, right: value, message: "Comparison (using ==) failed in:"]
       :refute -> [left: text, right: value, message: "Comparison (using !=) failed in:"]
     end)
-  end
-
-  def assert_attributes(html, selector, attributes, sub_fn \\ nil) do
-    html_tree = selector(:assert, html, selector)
-    html_element = Parser.to_html(html_tree)
-
-    attributes
-    |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
-    |> Enum.each(fn {attr, check_value} ->
-      attr_value = Selector.attribute(html_tree, attr)
-
-      case {attr, check_value, attr_value} do
-        {_attr, nil, attr_value} ->
-          raise_match(attr_value != nil, fn _ -> "Attribute `#{attr}` matched, but should haven't matched.\n\n\t#{html_element}.\n" end)
-
-        {attr, _check_value, nil} ->
-          assert_error("Attribute `#{attr}` not found.\n\n\t#{html_element}\n")
-
-        {"class", check_value, attr_value} ->
-          for check_class <- String.split(check_value, " ") do
-            raise_match(!String.contains?(attr_value, check_class), fn _ ->
-              "Class `#{check_class}` not found in `#{attr_value}` class attribute\n\n\t#{html_element}\n"
-            end)
-          end
-
-        {attr, %Regex{} = check_value, attr_value} ->
-          raise_match(!Regex.match?(check_value, attr_value), fn _ ->
-            [
-              message: "Comparison `#{attr}` attribute failed.\n\n\t#{html_element}.\n",
-              left: check_value,
-              right: attr_value
-            ]
-          end)
-
-        {attribute, check_value, attr_value} ->
-          str_check_value = to_string(check_value)
-
-          raise_match(str_check_value != attr_value, fn _ ->
-            [
-              message: "Comparison `#{attribute}` attribute failed.\n\n\t#{html_element}.\n",
-              left: str_check_value,
-              right: attr_value
-            ]
-          end)
-      end
-    end)
-
-    if sub_fn do
-      sub_fn.(Parser.to_html(html_tree))
-    end
   end
 
   defp raise_match(check \\ :assert, condition, message_fn) when check in [:assert, :refute] do
