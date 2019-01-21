@@ -63,8 +63,8 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "expect check value", %{html: html} do
-      contain(:assert, html, "Merry Christmas")
-      contain(:assert, html, "<p>Merry Christmas")
+      contain(:assert, html, ~r"Merry Christmas")
+      contain(:assert, html, ~r"<p>Merry Christmas")
     end
   end
 end

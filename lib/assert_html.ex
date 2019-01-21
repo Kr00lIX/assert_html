@@ -61,7 +61,21 @@ defmodule AssertHTML do
   end
 
   @doc """
+
+  selector
+  assert_html(html, "css selector")
+
+  text exists
+  assert_html()
   """
+  def assert_html(html, %Regex{}=value) do
+    Matcher.contain(:assert, html, value)
+    html
+  end
+  def assert_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
+    block_fn.(html)
+    html
+  end
   def assert_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
     html(:assert, html, css_selector)
   end
@@ -72,37 +86,54 @@ defmodule AssertHTML do
     html(:assert, html, nil, nil, inside_fn)
   end
 
-  def assert_html(html, attributes, inside_fn) when is_binary(html) and is_list(attributes) and is_function(inside_fn) do
-    html(:assert, html, nil, attributes, inside_fn)
+  def assert_html(html, %Regex{}=value, block_fn) when is_binary(html) and is_function(block_fn) do
+    Matcher.contain(:assert, html, value)
+    if block_fn, do: block_fn.(html)
+    html
   end
-  def assert_html(html, css_selector, inside_fn) when is_binary(html) and is_binary(css_selector) and is_function(inside_fn) do
-    html(:assert, html, css_selector, nil, inside_fn)
+  def assert_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
+    html(:assert, html, nil, attributes, block_fn)
   end
-  def assert_html(html, css_selector, attributes, inside_fn \\ nil) do
-    html(:assert, html, css_selector, attributes, inside_fn)
+  def assert_html(html, css_selector, block_fn) when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
+    html(:assert, html, css_selector, nil, block_fn)
   end
 
+  def assert_html(html, css_selector, attributes, block_fn \\ nil) do
+    html(:assert, html, css_selector, attributes, block_fn)
+  end
+
+  def refute_html(html, %Regex{}=value) when is_binary(html) do
+    Matcher.contain(:refute, html, value)
+    html
+  end
   def refute_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
     html(:refute, html, css_selector)
   end
   def refute_html(html, attributes) when is_binary(html) and is_list(attributes) do
     html(:refute, html, nil, attributes)
   end
-  def refute_html(html, inside_fn) when is_binary(html) and is_function(inside_fn) do
-    html(:refute, html, nil, nil, inside_fn)
-  end
-  def refute_html(html, attributes, inside_fn) when is_binary(html) and is_list(attributes) and is_function(inside_fn) do
-    html(:refute, html, nil, attributes, inside_fn)
-  end
-  def refute_html(html, css_selector, inside_fn) when is_binary(html) and is_binary(css_selector) and is_function(inside_fn) do
-    html(:refute, html, css_selector, nil, inside_fn)
-  end
-  def refute_html(html, css_selector, attributes, inside_fn \\ nil) when is_binary(html) and is_binary(css_selector) do
-    html(:refute, html, css_selector, attributes, inside_fn)
+  def refute_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
+    html(:refute, html, nil, nil, block_fn)
   end
 
-  defp html(matcher, context, css_selector, attributes \\ nil, inside_fn \\ nil) do
-    # [matcher: matcher, context: context, css_selector: css_selector, attributes: attributes, inside_fn: inside_fn] |> IO.inspect(label: "html")
+  def refute_html(html, %Regex{}=value, block_fn) when is_binary(html) and is_function(block_fn) do
+    Matcher.contain(:refute, html, value)
+    if block_fn, do: block_fn.(html)
+    html
+  end
+  def refute_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
+    html(:refute, html, nil, attributes, block_fn)
+  end
+  def refute_html(html, css_selector, block_fn) when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
+    html(:refute, html, css_selector, nil, block_fn)
+  end
+
+  def refute_html(html, css_selector, attributes, block_fn \\ nil) when is_binary(html) and is_binary(css_selector) do
+    html(:refute, html, css_selector, attributes, block_fn)
+  end
+
+  defp html(matcher, context, css_selector, attributes \\ nil, block_fn \\ nil) do
+    # [matcher: matcher, context: context, css_selector: css_selector, attributes: attributes, block_fn: block_fn] |> IO.inspect(label: "html")
 
     sub_context =
       if css_selector != nil do
@@ -111,14 +142,14 @@ defmodule AssertHTML do
         context
       end
 
-    if attributes do
+    if is_list(attributes) do
       # check attributes sub_context
       Matcher.attributes(sub_context, attributes)
     end
 
     # call inside block
-    if inside_fn do
-      inside_fn.(sub_context)
+    if block_fn do
+      block_fn.(sub_context)
     end
     context
   end

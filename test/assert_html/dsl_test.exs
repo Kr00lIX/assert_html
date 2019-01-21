@@ -88,4 +88,22 @@ defmodule AssertHTML.DSLTest do
       end
     end
   end
+
+  describe ".asserth_html (check contains)" do
+    setup do
+      [html: ~S{
+        <div class="content">
+          <h1>Hello World</h1>
+        </div>
+      }]
+    end
+
+    test "expect find contain text", %{html: html} do
+      assert_html(html, ~r{Hello World})
+      refute_html(html, ~r{Another World})
+      assert_html(html, ".content") do
+        assert_html ~r{Hello World}
+      end
+    end
+  end
 end

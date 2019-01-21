@@ -19,7 +19,7 @@ defmodule AssertHTML.Matcher do
     sub_html
   end
 
-  def attributes(html, attributes) do
+  def attributes(html, attributes) when is_list(attributes) do
     attributes
     |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
     |> Enum.each(fn {attribute, check_value} ->
@@ -66,12 +66,10 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  def contain(matcher, html, value) do
-    str_value = to_string(value)
-
-    raise_match(matcher, !String.contains?(html, str_value), fn
-      :assert -> "Value `#{value}` not found.\n\n\t#{html}\n"
-      :refute -> "Value `#{value}` found, but shouldn't.\n\n\t#{html}\n"
+  def contain(matcher, html, %Regex{}=value) do
+    raise_match(matcher, !Regex.match?(value, html), fn
+      :assert -> "Value `#{inspect value}` not found.\n\n\t#{html}\n"
+      :refute -> "Value `#{inspect value}` found, but shouldn't.\n\n\t#{html}\n"
     end)
   end
 
