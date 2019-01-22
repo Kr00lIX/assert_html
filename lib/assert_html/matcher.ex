@@ -16,6 +16,7 @@ defmodule AssertHTML.Matcher do
       :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
       :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
     end)
+
     sub_html
   end
 
@@ -36,7 +37,7 @@ defmodule AssertHTML.Matcher do
           # attribute exists
           :ok
 
-        {attribute, %Regex{}=check_value, attr_value} ->
+        {attribute, %Regex{} = check_value, attr_value} ->
           raise_match(!Regex.match?(check_value, attr_value), fn _ ->
             [
               message: "Matching `#{attribute}` attribute failed.\n\n\t#{html}.\n",
@@ -66,10 +67,10 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  def contain(matcher, html, %Regex{}=value) do
+  def contain(matcher, html, %Regex{} = value) do
     raise_match(matcher, !Regex.match?(value, html), fn
-      :assert -> "Value `#{inspect value}` not found.\n\n\t#{html}\n"
-      :refute -> "Value `#{inspect value}` found, but shouldn't.\n\n\t#{html}\n"
+      :assert -> "Value `#{inspect(value)}` not found.\n\n\t#{html}\n"
+      :refute -> "Value `#{inspect(value)}` found, but shouldn't.\n\n\t#{html}\n"
     end)
   end
 

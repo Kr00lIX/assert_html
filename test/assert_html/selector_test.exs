@@ -38,5 +38,4 @@ defmodule AssertHTMLTest.SelectorTest do
       assert text(~S{<input name="surname" />}) == ""
     end
   end
-
 end

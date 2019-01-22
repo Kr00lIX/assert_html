@@ -13,6 +13,7 @@ defmodule AssertHTMLTest.MatcherTest do
 
     test "raise error for unexpected attribute", %{html: html} do
       message = ~r{Attribute `class` matched, but should haven't matched.}
+
       assert_raise AssertionError, message, fn ->
         attributes(html, class: nil)
       end
@@ -24,6 +25,7 @@ defmodule AssertHTMLTest.MatcherTest do
       attributes(html, class: "-vertical")
 
       message = ~r{Class `wrong_class` not found in `table -vertical` class attribute}
+
       assert_raise AssertionError, message, fn ->
         attributes(html, class: "wrong_class")
       end
@@ -36,6 +38,7 @@ defmodule AssertHTMLTest.MatcherTest do
 
     test "expect error if attribute not exsists", %{html: html} do
       message = "\n\nAttribute `id` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
+
       assert_raise AssertionError, message, fn ->
         attributes(html, id: "new_element")
       end

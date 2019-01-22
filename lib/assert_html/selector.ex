@@ -18,9 +18,11 @@ defmodule AssertHTML.Selector do
   def attribute(html, attribute_name) when is_atom(attribute_name) do
     attribute(html, to_string(attribute_name))
   end
+
   def attribute(html, "text") do
     text(html)
   end
+
   def attribute(html, attribute_name) when is_binary(html) and is_binary(attribute_name) do
     Parser.attribute(html, attribute_name)
   end
@@ -46,6 +48,4 @@ defmodule AssertHTML.Selector do
   end
 
   ####################################################################
-
-
 end
