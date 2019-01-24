@@ -96,5 +96,28 @@ defmodule AssertHTMLTest do
         assert_html(sub_html, ~r{Hello World})
       end)
     end
+
+    test "check contains as second argument", %{html: html} do
+      assert_html(html, "h1", ~r{Hello World!!!!})
+      assert_html(html, "h1", ~r{Hello World})
+      assert_html(html, "h1", "Hello World")
+      assert_html(html, "h1", "Hello World!!!!")
+
+      refute_html(html, "h1", ~r{Hello World!!!!})
+      refute_html(html, "h1", ~r{Hello World})
+      refute_html(html, "h1", "Hello World")
+      refute_html(html, "h1", "Hello World!!!!")
+    end
+
+    test "check match as attribute argument", %{html: html} do
+      assert_html(html, match: "Hello World")
+
+      assert_raise AssertionError, ~r"Value haven't found", fn ->
+        assert_html(html, "h1", match: "Hello World!!!!")
+      end
+
+      refute_html(html, match: "Hello World!!!!")
+      refute_html(html, "h1", match: "Hello World")
+    end
   end
 end

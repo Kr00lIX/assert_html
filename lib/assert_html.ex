@@ -3,7 +3,7 @@ defmodule AssertHTML do
   AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
   """
 
-  alias AssertHTML.{Matcher, Selector}
+  alias AssertHTML.{Matcher}
 
   @typedoc ~S"""
   CSS selector
@@ -66,17 +66,18 @@ defmodule AssertHTML do
     end
   end
 
+  ### assert
+
   @doc """
 
-  selector
+  ### selector
   assert_html(html, "css selector")
 
-  text exists
-  assert_html()
+  ### text or html exists
+  assert_html(html, ~r{<p>Hello</p>})
   """
   def assert_html(html, %Regex{} = value) do
-    Matcher.contain(:assert, html, value)
-    html
+    html(:assert, html, nil, match: value)
   end
 
   def assert_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
@@ -97,9 +98,7 @@ defmodule AssertHTML do
   end
 
   def assert_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
-    Matcher.contain(:assert, html, value)
-    if block_fn, do: block_fn.(html)
-    html
+    html(:assert, html, nil, [match: value], block_fn)
   end
 
   def assert_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
@@ -114,8 +113,19 @@ defmodule AssertHTML do
     html(:assert, html, css_selector, attributes, block_fn)
   end
 
-  def refute_html(html, %Regex{} = value) when is_binary(html) do
-    Matcher.contain(:refute, html, value)
+  ###################################
+  ### refute
+
+  @doc ~S"""
+
+  """
+  # def refute_html(html, css_selector, attributes, block_fn \\ nil)
+  def refute_html(html, %Regex{} = value) do
+    html(:refute, html, nil, match: value)
+  end
+
+  def refute_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
+    block_fn.(html)
     html
   end
 
@@ -127,14 +137,12 @@ defmodule AssertHTML do
     html(:refute, html, nil, attributes)
   end
 
-  def refute_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
-    html(:refute, html, nil, nil, block_fn)
+  def refute_html(html, inside_fn) when is_binary(html) and is_function(inside_fn) do
+    html(:refute, html, nil, nil, inside_fn)
   end
 
   def refute_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
-    Matcher.contain(:refute, html, value)
-    if block_fn, do: block_fn.(html)
-    html
+    html(:refute, html, nil, [match: value], block_fn)
   end
 
   def refute_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
@@ -145,7 +153,7 @@ defmodule AssertHTML do
     html(:refute, html, css_selector, nil, block_fn)
   end
 
-  def refute_html(html, css_selector, attributes, block_fn \\ nil) when is_binary(html) and is_binary(css_selector) do
+  def refute_html(html, css_selector, attributes, block_fn \\ nil) do
     html(:refute, html, css_selector, attributes, block_fn)
   end
 
@@ -160,6 +168,11 @@ defmodule AssertHTML do
       end
 
     if is_list(attributes) do
+      {contain_value, attributes} = Keyword.pop(attributes, :match)
+
+      # check :match
+      contain_value && Matcher.contain(matcher, sub_context, contain_value)
+
       # check attributes sub_context
       Matcher.attributes(sub_context, attributes)
     end

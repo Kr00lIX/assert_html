@@ -28,19 +28,21 @@ defmodule AssertHTML.DSL do
   ```
   """
   alias AssertHTML, as: HTML
+  alias AssertHTML.Debug
 
   defmacro assert_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
+    Debug.log(context: context, selector: selector, attributes: attributes, maybe_do_block: maybe_do_block)
     {args, block} = extract_block([context, selector, attributes], maybe_do_block)
-    result = call_html_method(:assert, args, block)
-    IO.puts("\n\n~~~~>>>>>      \n#{Macro.to_string(result)} \n<<<<<  ~~\n")
-    result
+
+    call_html_method(:assert, args, block)
+    |> Debug.log_dsl()
   end
 
   defmacro refute_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
     {args, block} = extract_block([context, selector, attributes], maybe_do_block)
-    result = call_html_method(:refute, args, block)
-    IO.puts("\n\n~~~~>>>>>      \n#{Macro.to_string(result)} \n<<<<<  ~~\n")
-    result
+
+    call_html_method(:refute, args, block)
+    |> Debug.log_dsl()
   end
 
   defp call_html_method(matcher, args, block \\ nil)

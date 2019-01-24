@@ -67,7 +67,19 @@ defmodule AssertHTMLTest.MatcherTest do
 
     test "expect check value", %{html: html} do
       contain(:assert, html, ~r"Merry Christmas")
-      contain(:assert, html, ~r"<p>Merry Christmas")
+      contain(:assert, html, ~r"<p>Merry Christmas</p>")
+      contain(:refute, html, ~r"Peper")
+      contain(:refute, html, ~r"<h2>Merry Christmas")
+    end
+
+    test "expect raise error for unmached value", %{html: html} do
+      assert_raise AssertionError, ~r{Value `~r/Merry Christmas/` matched, but shouldn't.}, fn ->
+        contain(:refute, html, ~r"Merry Christmas")
+      end
+
+      assert_raise AssertionError, ~r"Value not matched.", fn ->
+        contain(:assert, html, ~r"<h2>Merry Christmas")
+      end
     end
   end
 end

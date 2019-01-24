@@ -94,7 +94,7 @@ defmodule AssertHTML.DSLTest do
     end
   end
 
-  describe ".asserth_html (check contains)" do
+  describe "(check contains)" do
     setup do
       [html: ~S{
         <div class="content">
@@ -109,6 +109,19 @@ defmodule AssertHTML.DSLTest do
 
       assert_html(html, ".content") do
         assert_html(~r{Hello World})
+      end
+    end
+  end
+
+  describe "(pass pipeline)" do
+    test "pass html to method through pipeline" do
+      ~S{
+        <div id="qwe">
+          <a class="link">Click me</a>
+        </div>
+      }
+      |> assert_html("#qwe") do
+        assert_html("a", class: "link", text: "Click me", id: nil)
       end
     end
   end

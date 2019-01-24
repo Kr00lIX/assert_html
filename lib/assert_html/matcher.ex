@@ -69,8 +69,15 @@ defmodule AssertHTML.Matcher do
 
   def contain(matcher, html, %Regex{} = value) do
     raise_match(matcher, !Regex.match?(value, html), fn
-      :assert -> "Value `#{inspect(value)}` not found.\n\n\t#{html}\n"
-      :refute -> "Value `#{inspect(value)}` found, but shouldn't.\n\n\t#{html}\n"
+      :assert -> [message: "Value not matched.", left: html, right: value]
+      :refute -> [message: "Value `#{inspect(value)}` matched, but shouldn't.", left: html, right: value]
+    end)
+  end
+
+  def contain(matcher, html, value) do
+    raise_match(matcher, !String.contains?(html, value), fn
+      :assert -> [message: "Value haven't found.", left: html, right: value]
+      :refute -> [message: "Value `#{inspect(value)}` found, but shouldn't.", left: html, right: value]
     end)
   end
 

@@ -10,6 +10,7 @@
 - Check no existing attributes `attribute_name: nil`
 
 ### Added
+- add `assert_html match: "value"` checker  
 - Add `assert_html_contains(html, value)` and `refute_html_contains(html, value)` checkers
 - Add `assert_html` macro for simplify DSL
   ```
