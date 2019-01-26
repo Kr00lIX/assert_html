@@ -36,13 +36,12 @@ defmodule AssertHTML do
   | E ~ F           | an F element preceded by an E element |
 
   """
-  @opaque css_selector :: String.t()
-
+  @type css_selector :: String.t()
 
   @typedoc """
   HTML response
   """
-  @opaque html :: String.t()
+  @type html :: String.t()
 
   @typedoc """
   HTML element attributes
@@ -59,7 +58,7 @@ defmodule AssertHTML do
   @typedoc """
   HTML element attribute name
   """
-  @type attribute_name :: atom()
+  @type attribute_name :: atom() | binary()
 
   @typep block_fn :: (html -> any())
 
@@ -177,7 +176,7 @@ defmodule AssertHTML do
   ### text or html exists
   assert_html(html, ~r{<p>Hello</p>})
   """
-  @spec assert_html(html, Regex.t) :: html | no_return()
+  @spec assert_html(html, Regex.t()) :: html | no_return()
   def assert_html(html, %Regex{} = value) do
     html(:assert, html, nil, match: value)
   end
@@ -197,7 +196,7 @@ defmodule AssertHTML do
     html(:assert, html, nil, attributes)
   end
 
-  @spec assert_html(html, Regex.t, block_fn) :: html | no_return()
+  @spec assert_html(html, Regex.t(), block_fn) :: html | no_return()
   def assert_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
     html(:assert, html, nil, [match: value], block_fn)
   end
@@ -234,7 +233,7 @@ defmodule AssertHTML do
   @doc ~S"""
 
   """
-  @spec refute_html(html, Regex.t) :: html | no_return()
+  @spec refute_html(html, Regex.t()) :: html | no_return()
   def refute_html(html, %Regex{} = value) do
     html(:refute, html, nil, match: value)
   end
@@ -255,7 +254,7 @@ defmodule AssertHTML do
     html(:refute, html, nil, attributes)
   end
 
-  @spec refute_html(html, Regex.t, block_fn) :: html | no_return()
+  @spec refute_html(html, Regex.t(), block_fn) :: html | no_return()
   def refute_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
     html(:refute, html, nil, [match: value], block_fn)
   end

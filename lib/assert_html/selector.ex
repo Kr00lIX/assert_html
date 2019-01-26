@@ -3,7 +3,7 @@ defmodule AssertHTML.Selector do
 
   alias AssertHTML.Parser
 
-  # @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
+  @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
   def find(html, css_selector) do
     html
     |> Parser.find(css_selector)
@@ -14,12 +14,12 @@ defmodule AssertHTML.Selector do
     end
   end
 
-  # @spec attribute(AssertHTML.html(), AssertHTML.attribute_name()) :: AssertHTML.html()
-  def attribute(html, attribute_name) when is_atom(attribute_name) do
+  @spec attribute(AssertHTML.html(), atom() | binary()) :: nil | binary()
+  def attribute(html, attribute_name) when is_binary(html) and is_atom(attribute_name) do
     attribute(html, to_string(attribute_name))
   end
 
-  def attribute(html, "text") do
+  def attribute(html, "text") when is_binary(html) do
     text(html)
   end
 
@@ -30,18 +30,8 @@ defmodule AssertHTML.Selector do
   @doc ~S"""
   Gets text from HTML element
   """
-  # @spec text(AssertHTML.html(), AssertHTML.css_selector()) :: String.t()
-  def text(html, css_selector) do
-    html
-    |> Parser.find(css_selector)
-    |> text()
-  end
-
-  @doc ~S"""
-  Gets text from HTML element
-  """
-  # @spec text(AssertHTML.html()) :: String.t()
-  def text(html) do
+  @spec text(AssertHTML.html()) :: binary()
+  def text(html) when is_binary(html) do
     html
     |> Parser.text()
     |> String.trim()

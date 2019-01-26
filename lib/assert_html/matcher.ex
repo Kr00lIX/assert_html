@@ -20,7 +20,7 @@ defmodule AssertHTML.Matcher do
     sub_html
   end
 
-  @spec attributes(AssertHTML.html, AssertHTML.attributes) :: any()
+  @spec attributes(AssertHTML.html(), AssertHTML.attributes()) :: any()
   def attributes(html, attributes) when is_list(attributes) do
     attributes
     |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
@@ -68,7 +68,7 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  @spec contain(assert_or_refute, binary(), Regex.t) :: any()
+  @spec contain(assert_or_refute, binary(), Regex.t()) :: any()
   def contain(matcher, html, %Regex{} = value) when is_binary(html) do
     raise_match(matcher, !Regex.match?(value, html), fn
       :assert -> [message: "Value not matched.", left: html, right: value]
@@ -76,47 +76,11 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  @spec contain(assert_or_refute, AssertHTML.html, AssertHTML.html) :: any()
+  @spec contain(assert_or_refute, AssertHTML.html(), AssertHTML.html()) :: any()
   def contain(matcher, html, value) when is_binary(html) and is_binary(value) do
     raise_match(matcher, !String.contains?(html, value), fn
       :assert -> [message: "Value not found.", left: html, right: value]
       :refute -> [message: "Value `#{inspect(value)}` found, but shouldn't.", left: html, right: value]
-    end)
-  end
-
-
-  # @spec text(assert_or_refute, AssertHTML.html,  AssertHTML.css_selector, AssertHTML.value) :: any()
-  def text(matcher, html, selector, value) do
-    doc = Parser.find(html, selector)
-
-    # ignore if element not found for :refute
-    if matcher == :assert do
-      raise_match(matcher, doc == [], fn _matcher ->
-        "Element `#{selector}` not found.\n\n\t#{html}\n"
-      end)
-    end
-
-    selected_html = Parser.to_html(doc)
-    text(matcher, selected_html, value)
-  end
-
-  # @spec text(:assert | :refute, binary() | [any()] | tuple(), any()) :: nil
-  def text(matcher, html_element, %Regex{} = value) do
-    text = Parser.text(html_element)
-
-    raise_match(matcher, !Regex.match?(value, text), fn
-      :assert -> [message: "Match failed #{inspect(value)} in `#{text}`.\n\n\t#{html_element}.", left: value, right: html_element]
-      :refute -> [message: "Text matched, but should haven't matched.\n\n\t#{html_element}.", left: value, right: html_element]
-    end)
-  end
-
-  # need?
-  def text(matcher, html, value) do
-    text = Parser.text(html)
-
-    raise_match(matcher, text != value, fn
-      :assert -> [left: text, right: value, message: "Comparison (using ==) failed in:"]
-      :refute -> [left: text, right: value, message: "Comparison (using !=) failed in:"]
     end)
   end
 
