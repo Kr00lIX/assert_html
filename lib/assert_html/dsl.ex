@@ -2,7 +2,7 @@ defmodule AssertHTML.DSL do
   @moduledoc ~S"""
   Add aditional syntax to passing current context inside block
 
-  ## Example 1: pass context
+  ### Example: pass context
   ```
   assert_html html, ".container" do
     assert_html "form", action: "/users" do

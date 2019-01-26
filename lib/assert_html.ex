@@ -3,7 +3,7 @@ defmodule AssertHTML do
   AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
   """
 
-  alias AssertHTML.{Matcher, Selector, Debug}
+  alias AssertHTML.{Debug, Matcher, Selector}
 
   @typedoc ~S"""
   CSS selector
@@ -81,14 +81,8 @@ defmodule AssertHTML do
     end
   end
 
-  # defguardp is_regex(value) when is_map(value) and :erlang.is_map_key(value, :__struct__) and :erlang.is_map_key(value, :source) and :erlang.is_map_key(value, :re_pattern)
-  # defguardp is_contains(value) when is_binary(value) or is_regex(value)
-
-  ### assert
-
   @doc ~S"""
   Asserts an attributes in HTML element
-
 
   ## assert attributes
 
@@ -100,10 +94,9 @@ defmodule AssertHTML do
       ...> assert_html(html, ".zoo", class: "bar zoo")
       ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
 
-      # check if `id` not exsists
+      \# check if `id` not exsists
       iex> assert_html(~S{<div>text</div>}, id: nil)
       "<div>text</div>"
-
 
   #### Examples check :text
 
@@ -116,7 +109,6 @@ defmodule AssertHTML do
       iex> html = ~S{<div class="container">   <h1 class="title">Header</h1>   </div>}
       ...> assert_html(html, ".title", text: "Header")
       ~S{<div class="container">   <h1 class="title">Header</h1>   </div>}
-
 
       iex> html = ~S{<h1 class="title">Header</h1>}
       ...> try do
@@ -134,7 +126,6 @@ defmodule AssertHTML do
       ...> assert_html(html, text: "Some & text")
       ~S{<div class="foo">Some &amp; text</div>}
 
-
   ## Selector
 
       # assert_html(html, "css selector")
@@ -147,14 +138,12 @@ defmodule AssertHTML do
       ...> assert_html(html, "h1")
       ~S{<p><div class="foo"><h1>Header</h1></div></p>}
 
-
-
   ## Match elements in HTML
       assert_html(html, ~r{<p>Hello</p>})
       assert_html(html, match: ~r{<p>Hello</p>})
       assert_html(html, match: "<p>Hello</p>")
 
-        # Asserts an text element in HTML
+      \# Asserts an text element in HTML
 
   ### Examples
 
@@ -168,10 +157,6 @@ defmodule AssertHTML do
 
   ## assert elements in selector
       assert_html(html, ".container table", ~r{<p>Hello</p>})
-
-
-
-
 
   ### text or html exists
   assert_html(html, ~r{<p>Hello</p>})
@@ -286,30 +271,37 @@ defmodule AssertHTML do
   end
 
   defp html(matcher, context, css_selector, attributes \\ nil, block_fn \\ nil)
+
+  defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
+    html(matcher, context, css_selector, [], block_fn)
+  end
+
+  defp html(matcher, context, css_selector, attributes, block_fn)
        when matcher in [:assert, :refute] and
               is_binary(context) and
               (is_binary(css_selector) or is_nil(css_selector)) and
-              (is_list(attributes) or is_nil(attributes)) and
+              is_list(attributes) and
               (is_function(block_fn) or is_nil(block_fn)) do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
-    attributes = (is_list(attributes) && attributes) || []
     sub_context = get_context(%{matcher: matcher, context: context, css_selector: css_selector, attributes: attributes})
+    check_attributes(matcher, sub_context, attributes)
+
+    # call inside block
+    block_fn && block_fn.(sub_context)
+
+    context
+  end
+
+  defp check_attributes(matcher, sub_context, attributes) do
     {contain_value, attributes} = Keyword.pop(attributes, :match)
 
-    # check :match
+    # check metattribute :match
     contain_value && Matcher.contain(matcher, sub_context, contain_value)
 
     if attributes != [] do
       Matcher.attributes(sub_context, attributes)
     end
-
-    # call inside block
-    if block_fn do
-      block_fn.(sub_context)
-    end
-
-    context
   end
 
   defp get_context(%{context: context, css_selector: nil}) do
