@@ -39,6 +39,7 @@ defmodule AssertHTML.DSL do
   end
 
   defmacro refute_html(context, selector \\ nil, attributes \\ nil, maybe_do_block \\ nil) do
+    Debug.log(context: context, selector: selector, attributes: attributes, maybe_do_block: maybe_do_block)
     {args, block} = extract_block([context, selector, attributes], maybe_do_block)
 
     call_html_method(:refute, args, block)
@@ -76,17 +77,21 @@ defmodule AssertHTML.DSL do
   end
 
   defp extract_block(args, _maybe_block) do
-    args
-    |> Enum.reject(&(&1 == nil))
-    |> Enum.map_reduce(nil, fn
-      arg, acc when is_list(arg) ->
-        {maybe_block, updated_arg} = Keyword.pop(arg, :do)
-        new_arg = if updated_arg == [], do: nil, else: updated_arg
-        {new_arg, acc || maybe_block}
+    {args, block} =
+      args
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.map_reduce(nil, fn
+        arg, acc when is_list(arg) ->
+          {maybe_block, updated_arg} = Keyword.pop(arg, :do)
+          new_arg = if updated_arg == [], do: nil, else: updated_arg
+          {new_arg, acc || maybe_block}
 
-      arg, acc ->
-        {arg, acc}
-    end)
+        arg, acc ->
+          {arg, acc}
+      end)
+      |> IO.inspect(label: "extract_block")
+
+    {Enum.filter(args, & &1 != nil), block}
   end
 
   # replace assert_html without arguments to context
@@ -115,14 +120,6 @@ defmodule AssertHTML.DSL do
 
   def postwalk(segment) do
     segment
-  end
-
-  def assert_html_attributes(arg1, arg2 \\ nil, arg3 \\ nil, arg4 \\ nil) do
-    [arg1: arg1, arg2: arg2, arg3: arg3, arg4: arg4] |> IO.inspect(label: "call assert_html_attributes")
-
-    if arg4 do
-      arg4.(arg1)
-    end
   end
 
   defp context_var(env \\ []) do

@@ -3,7 +3,7 @@ defmodule AssertHTML do
   AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
   """
 
-  alias AssertHTML.{Matcher}
+  alias AssertHTML.{Matcher, Selector, Debug}
 
   @typedoc ~S"""
   CSS selector
@@ -37,17 +37,18 @@ defmodule AssertHTML do
 
   """
   @opaque css_selector :: String.t()
-
   @opaque html :: String.t()
-
   @type attributes :: []
+
+
 
   @typedoc """
   HTML element attribute name
   """
   @type attribute_name :: String.t() | atom()
+  @type value :: nil | String.t | Regex.t
 
-  @typep value :: String.t()
+  # @typep value :: String.t()
 
   # use macro definition
   defmacro __using__(_opts) do
@@ -66,23 +67,107 @@ defmodule AssertHTML do
     end
   end
 
+  # defguardp is_regex(value) when is_map(value) and :erlang.is_map_key(value, :__struct__) and :erlang.is_map_key(value, :source) and :erlang.is_map_key(value, :re_pattern)
+  # defguardp is_contains(value) when is_binary(value) or is_regex(value)
+
   ### assert
 
-  @doc """
+  @doc ~S"""
+  Asserts an attributes in HTML element
 
-  ### selector
-  assert_html(html, "css selector")
+
+  ## assert attributes
+
+  ### Attribute names
+  - `text` – asserts an text element in HTML
+  - `:match` - asserts containing value in html
+
+      iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
+      ...> assert_html(html, ".zoo", class: "bar zoo")
+      ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
+
+      # check if `id` not exsists
+      iex> assert_html(~S{<div>text</div>}, id: nil)
+      "<div>text</div>"
+
+
+  #### Examples check :text
+
+  Asserts an text element in HTML
+
+      iex> html = ~S{<h1 class="title">Header</h1>}
+      ...> assert_html(html, text: "Header")
+      ~S{<h1 class="title">Header</h1>}
+
+      iex> html = ~S{<div class="container">   <h1 class="title">Header</h1>   </div>}
+      ...> assert_html(html, ".title", text: "Header")
+      ~S{<div class="container">   <h1 class="title">Header</h1>   </div>}
+
+
+      iex> html = ~S{<h1 class="title">Header</h1>}
+      ...> try do
+      ...>   assert_html(html, text: "HEADER")
+      ...> rescue
+      ...>   e in ExUnit.AssertionError -> e
+      ...> end
+      %ExUnit.AssertionError{
+        left: "HEADER",
+        right: "Header",
+        message: "Comparison `text` attribute failed.\n\n\t<h1 class=\"title\">Header</h1>.\n"
+      }
+
+      iex> html = ~S{<div class="foo">Some &amp; text</div>}
+      ...> assert_html(html, text: "Some & text")
+      ~S{<div class="foo">Some &amp; text</div>}
+
+
+  ## Selector
+
+      # assert_html(html, "css selector")
+
+      iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+      ...> assert_html(html, "p .foo h1")
+      ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+
+      iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+      ...> assert_html(html, "h1")
+      ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+
+
+
+  ## Match elements in HTML
+      assert_html(html, ~r{<p>Hello</p>})
+      assert_html(html, match: ~r{<p>Hello</p>})
+      assert_html(html, match: "<p>Hello</p>")
+
+        # Asserts an text element in HTML
+
+  ### Examples
+
+      iex> html = ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
+      ...> assert_html(html, "h1", "Hello World") == html
+      true
+
+      iex> html = ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
+      ...> assert_html(html, ".title", ~r{World})
+      ~S{<div class="container">   <h1 class="title">Hello World</h1>   </div>}
+
+  ## assert elements in selector
+      assert_html(html, ".container table", ~r{<p>Hello</p>})
+
+
+
+
 
   ### text or html exists
   assert_html(html, ~r{<p>Hello</p>})
   """
   def assert_html(html, %Regex{} = value) do
-    html(:assert, html, nil, match: value)
+    html(:assert, html, nil, [match: value])
   end
 
   def assert_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
-    block_fn.(html)
-    html
+    html(:assert, html, nil, nil, block_fn)
   end
 
   def assert_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
@@ -91,10 +176,6 @@ defmodule AssertHTML do
 
   def assert_html(html, attributes) when is_binary(html) and is_list(attributes) do
     html(:assert, html, nil, attributes)
-  end
-
-  def assert_html(html, inside_fn) when is_binary(html) and is_function(inside_fn) do
-    html(:assert, html, nil, nil, inside_fn)
   end
 
   def assert_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
@@ -109,7 +190,20 @@ defmodule AssertHTML do
     html(:assert, html, css_selector, nil, block_fn)
   end
 
-  def assert_html(html, css_selector, attributes, block_fn \\ nil) do
+  def assert_html(html, css_selector, attributes, block_fn \\ nil)
+
+  def assert_html(html, css_selector, %Regex{}=value, block_fn) when is_binary(html) and is_binary(css_selector) do
+    html(:assert, html, css_selector, [match: value], block_fn)
+  end
+  def assert_html(html, css_selector, value, block_fn) when is_binary(html) and is_binary(css_selector) and is_binary(value) do
+    html(:assert, html, css_selector, [match: value], block_fn)
+  end
+
+  def assert_html(html, css_selector, value, block_fn)  when is_binary(html) and is_binary(css_selector) and is_binary(value) do
+    html(:assert, html, css_selector, [match: value], block_fn)
+  end
+
+  def assert_html(html, css_selector, attributes, block_fn) do
     html(:assert, html, css_selector, attributes, block_fn)
   end
 
@@ -121,7 +215,7 @@ defmodule AssertHTML do
   """
   # def refute_html(html, css_selector, attributes, block_fn \\ nil)
   def refute_html(html, %Regex{} = value) do
-    html(:refute, html, nil, match: value)
+    html(:refute, html, nil, [match: value])
   end
 
   def refute_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
@@ -153,27 +247,35 @@ defmodule AssertHTML do
     html(:refute, html, css_selector, nil, block_fn)
   end
 
-  def refute_html(html, css_selector, attributes, block_fn \\ nil) do
+  def refute_html(html, css_selector, attributes, block_fn \\ nil)
+
+  def refute_html(html, css_selector, %Regex{}=value, block_fn) do
+    html(:refute, html, css_selector, [match: value], block_fn)
+  end
+  def refute_html(html, css_selector, value, block_fn) when is_binary(html) and is_binary(css_selector) and is_binary(value) do
+    html(:refute, html, css_selector, [match: value], block_fn)
+  end
+  def refute_html(html, css_selector, attributes, block_fn) do
     html(:refute, html, css_selector, attributes, block_fn)
   end
 
-  defp html(matcher, context, css_selector, attributes \\ nil, block_fn \\ nil) do
-    # [matcher: matcher, context: context, css_selector: css_selector, attributes: attributes, block_fn: block_fn] |> IO.inspect(label: "html")
+  defp html(matcher, context, css_selector, attributes \\ nil, block_fn \\ nil)
+    when matcher in [:assert, :refute]
+        and is_binary(context)
+        and (is_binary(css_selector) or is_nil(css_selector))
+        and (is_list(attributes) or is_nil(attributes))
+        and (is_function(block_fn) or is_nil(block_fn))
+  do
+    Debug.log "call .html with arguments: #{inspect binding()}"
+    attributes = is_list(attributes) && attributes || []
+    sub_context = get_context(%{matcher: matcher, context: context, css_selector: css_selector, attributes: attributes})
 
-    sub_context =
-      if css_selector != nil do
-        Matcher.selector(matcher, context, css_selector)
-      else
-        context
-      end
+    {contain_value, attributes} = Keyword.pop(attributes, :match)
 
-    if is_list(attributes) do
-      {contain_value, attributes} = Keyword.pop(attributes, :match)
+    # check :match
+    contain_value && Matcher.contain(matcher, sub_context, contain_value)
 
-      # check :match
-      contain_value && Matcher.contain(matcher, sub_context, contain_value)
-
-      # check attributes sub_context
+    if attributes != [] do
       Matcher.attributes(sub_context, attributes)
     end
 
@@ -183,5 +285,15 @@ defmodule AssertHTML do
     end
 
     context
+  end
+
+  defp get_context(%{context: context, css_selector: nil}) do
+    context
+  end
+  defp get_context(%{matcher: :refute, attributes: attributes, context: context, css_selector: css_selector}) when attributes != [] do
+    Selector.find(context, css_selector)
+  end
+  defp get_context(%{matcher: matcher, context: context, css_selector: css_selector}) do
+    Matcher.selector(matcher, context, css_selector)
   end
 end

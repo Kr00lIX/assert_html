@@ -40,17 +40,11 @@ defmodule AssertHTMLTest do
     end
 
     test "raise AssertionError exception for unmatched selection", %{html: html} do
-      message =
-        "\n\nElement `.invalid .selector` not found.\n     \n     \t\n             <div class=\"container\">\n               <h1>Hello</h1>\n               <p class=\"description\">\n                 Paragraph\n               </p>\n               <h1>World</h1>\n             </div>\n           \n     \n"
-
-      assert_raise AssertionError, message, fn ->
+      assert_raise AssertionError, ~r{Element `.invalid .selector` not found.}, fn ->
         assert_html(html, ".invalid .selector")
       end
 
-      message =
-        "\n\nSelector `.container h1` succeeded, but should have failed.\n     \n     \t\n             <div class=\"container\">\n               <h1>Hello</h1>\n               <p class=\"description\">\n                 Paragraph\n               </p>\n               <h1>World</h1>\n             </div>\n           \n     \n"
-
-      assert_raise AssertionError, message, fn ->
+      assert_raise AssertionError, ~r{Selector `.container h1` succeeded, but should have failed}, fn ->
         refute_html(html, ".container h1")
       end
     end
@@ -97,27 +91,42 @@ defmodule AssertHTMLTest do
       end)
     end
 
-    test "check contains as second argument", %{html: html} do
-      assert_html(html, "h1", ~r{Hello World!!!!})
+    test "check contains in selector", %{html: html} do
+      assert_raise AssertionError, ~r"Value not matched.", fn ->
+        assert_html(html, "h1", ~r{Hello World!!!!})
+      end
+
       assert_html(html, "h1", ~r{Hello World})
       assert_html(html, "h1", "Hello World")
-      assert_html(html, "h1", "Hello World!!!!")
+      assert_raise AssertionError, ~r"Value not found", fn ->
+        assert_html(html, "h1", "Hello World!!!!")
+      end
 
+      refute_html(html, "h1", match: "Hello World!!!")
+    end
+
+    test "check contains as second argument", %{html: html} do
       refute_html(html, "h1", ~r{Hello World!!!!})
-      refute_html(html, "h1", ~r{Hello World})
-      refute_html(html, "h1", "Hello World")
+      assert_raise AssertionError, ~r"Value `~r/Hello World/` matched, but shouldn't.", fn ->
+        refute_html(html, "h1", ~r{Hello World})
+      end
+      assert_raise AssertionError,  ~r{Value `"Hello World"` found, but shouldn't.}, fn ->
+        refute_html(html, "h1", "Hello World")
+      end
+
       refute_html(html, "h1", "Hello World!!!!")
     end
 
     test "check match as attribute argument", %{html: html} do
       assert_html(html, match: "Hello World")
 
-      assert_raise AssertionError, ~r"Value haven't found", fn ->
+      assert_raise AssertionError, ~r"Value not found", fn ->
         assert_html(html, "h1", match: "Hello World!!!!")
       end
 
       refute_html(html, match: "Hello World!!!!")
-      refute_html(html, "h1", match: "Hello World")
+
+
     end
   end
 end
