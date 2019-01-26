@@ -77,21 +77,23 @@ defmodule AssertHTML.DSL do
   end
 
   defp extract_block(args, _maybe_block) do
-    {args, block} =
-      args
-      |> Enum.reject(&(&1 == nil))
-      |> Enum.map_reduce(nil, fn
-        arg, acc when is_list(arg) ->
-          {maybe_block, updated_arg} = Keyword.pop(arg, :do)
-          new_arg = if updated_arg == [], do: nil, else: updated_arg
-          {new_arg, acc || maybe_block}
+    args
+    |> Enum.reverse()
+    |> Enum.reduce({[], nil}, fn
+      arg, {args, block} when is_list(arg) ->
+        {maybe_block, updated_arg} = Keyword.pop(arg, :do)
 
-        arg, acc ->
-          {arg, acc}
-      end)
-      |> IO.inspect(label: "extract_block")
+        {
+          (updated_arg == [] && args) || [updated_arg | args],
+          block || maybe_block
+        }
 
-    {Enum.filter(args, & &1 != nil), block}
+      nil, {args, block} ->
+        {args, block}
+
+      arg, {args, block} ->
+        {[arg | args], block}
+    end)
   end
 
   # replace assert_html without arguments to context

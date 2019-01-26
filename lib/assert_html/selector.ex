@@ -3,7 +3,7 @@ defmodule AssertHTML.Selector do
 
   alias AssertHTML.Parser
 
-  @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
+  # @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
   def find(html, css_selector) do
     html
     |> Parser.find(css_selector)
@@ -14,7 +14,7 @@ defmodule AssertHTML.Selector do
     end
   end
 
-  @spec attribute(AssertHTML.html(), AssertHTML.attribute_name()) :: AssertHTML.html()
+  # @spec attribute(AssertHTML.html(), AssertHTML.attribute_name()) :: AssertHTML.html()
   def attribute(html, attribute_name) when is_atom(attribute_name) do
     attribute(html, to_string(attribute_name))
   end
@@ -30,7 +30,7 @@ defmodule AssertHTML.Selector do
   @doc ~S"""
   Gets text from HTML element
   """
-  @spec text(AssertHTML.html(), AssertHTML.css_selector()) :: String.t()
+  # @spec text(AssertHTML.html(), AssertHTML.css_selector()) :: String.t()
   def text(html, css_selector) do
     html
     |> Parser.find(css_selector)
@@ -40,12 +40,10 @@ defmodule AssertHTML.Selector do
   @doc ~S"""
   Gets text from HTML element
   """
-  @spec text(AssertHTML.html()) :: String.t()
+  # @spec text(AssertHTML.html()) :: String.t()
   def text(html) do
     html
     |> Parser.text()
     |> String.trim()
   end
-
-  ####################################################################
 end
