@@ -5,15 +5,40 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
 
 ## Usage
 
+### Contains
+  `assert_html(html, ~r{Hello World})` - match sting in HTML  
+  `refute_html(html, ~r{Another World})` - 
+  
+  ```
+   assert_html(html, ".content") do
+     assert_html(~r{Hello World})
+   end
+  ```    
+      
 ### CSS selectors
 
+ `assert_html(html, ".css .selector")` - check element exists in CSS selector path
 
-`assert_html(html, ".css .selector")`
+  `refute_html(html, ".errors .error")` - element not exists in path
 
-Check element exists in CSS selector path
-`refute_html(html, ".errors .error")`
+### Check attributes
 
-g
+```elixir
+assert_html(html, "form", class: "form", method: "post", action: "/session/login") do
+  assert_html ".-email" do
+    assert_html("label", text: "Email", for: "staticEmail", class: "col-form-label")
+    assert_html("div input", type: "text", readonly: true, class: "form-control-plaintext", value: "email@example.com")
+  end
+  assert_html(".-password") do
+    assert_html("label", text: "Password", for: "inputPassword")
+    assert_html("div input", placeholder: "Password", type: "password", class: "form-control", id: "inputPassword", placeholder: "Password")
+  end
+
+  assert_html("button", type: "submit", class: "primary")
+end
+```
+
+### Example
 
 ```elixir
 defmodule ExampleControllerTest do
