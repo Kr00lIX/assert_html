@@ -4,6 +4,17 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
 
 
 ## Usage
+
+### CSS selectors
+
+
+`assert_html(html, ".css .selector")`
+
+Check element exists in CSS selector path
+`refute_html(html, ".errors .error")`
+
+g
+
 ```elixir
 defmodule ExampleControllerTest do
   use ExUnit.Case, async: true
@@ -13,34 +24,26 @@ defmodule ExampleControllerTest do
     conn_resp = get(conn, Routes.page_path(conn, :new))
     assert response = html_response(conn_resp, 200)
 
-    response
-    |> assert_html_selector("p.description")
-    |> refute_html_selector(".flash-message")
-    |> assert_html_attributes("form.new_page", [action: Routes.page_path(conn, :create), method: "post"], fn(html)->
-      html
-      |> assert_html_attributes("label", class: "form-label", text: "Page name")
-      |> assert_html_attributes("input", type: "text", class: "form-control", value: "", name: "page_name")
-      |> assert_html_attributes("button", class: "form-button", text: "Submit")
-    end)
+    assert_html response do
+      # Check element exists in CSS selector path
+      assert_html "p.description"
+
+      # element doesn't exists
+      refute_html ".flash-message"
+
+      # assert form attributes
+      assert_html "form.new_page", action: Routes.page_path(conn, :create), method: "post" do
+        # assert elements inside the `form.new_page` selector
+        assert_html "label", class: "form-label", text: "Page name"
+        assert_html "input", type: "text", class: "form-control", value: "", name: "page_name"
+        assert_html "button", class: "form-button", text: "Submit"
+      end
+    end
   end
 end
 ```
 
 See [HexDocs](https://hexdocs.pm/Kr00lIX/assert_html.html) for additional documentation.
-
-## Helpers Available
-
-- `assert_attributes(html, selector, [id: "name"], fn(sub_html)->   end)`
-- `assert_html_selector(html, css_selector)`  
-- `refute_html_selector((html, css_selector, value)`
-- `assert_html_text(html, value)`  
-- `assert_html_text(html, css_selector, value)`
-- `refute_html_text(html, value)` 
-- `refute_html_text((html, css_selector, value)`
-- `html_selector(html, css_selector)` 
-- `html_attribute(html, css_selector)`  
-- `html_attribute(html, css_selector, name)`
-- `html_text(html, css_selector)` 
 
 
 ## Installation

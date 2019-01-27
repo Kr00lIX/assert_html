@@ -85,18 +85,18 @@ defmodule AssertHTML do
   Asserts an attributes in HTML element
 
   ## assert attributes
-
-  ### Attribute names
   - `text` – asserts an text element in HTML
   - `:match` - asserts containing value in html
 
-      iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
-      ...> assert_html(html, ".zoo", class: "bar zoo")
-      ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
+  ```
+  iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
+  ...> assert_html(html, ".zoo", class: "bar zoo")
+  ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
 
-      \# check if `id` not exsists
-      iex> assert_html(~S{<div>text</div>}, id: nil)
-      "<div>text</div>"
+  # check if `id` not exsists
+  iex> assert_html(~S{<div>text</div>}, id: nil)
+  "<div>text</div>"
+  ```
 
   #### Examples check :text
 
@@ -128,8 +128,9 @@ defmodule AssertHTML do
 
   ## Selector
 
-      # assert_html(html, "css selector")
+  `assert_html(html, "css selector")`
 
+  ```
       iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
       ...> assert_html(html, "p .foo h1")
       ~S{<p><div class="foo"><h1>Header</h1></div></p>}
@@ -137,6 +138,7 @@ defmodule AssertHTML do
       iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
       ...> assert_html(html, "h1")
       ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+  ```
 
   ## Match elements in HTML
       assert_html(html, ~r{<p>Hello</p>})
@@ -157,9 +159,6 @@ defmodule AssertHTML do
 
   ## assert elements in selector
       assert_html(html, ".container table", ~r{<p>Hello</p>})
-
-  ### text or html exists
-  assert_html(html, ~r{<p>Hello</p>})
   """
   @spec assert_html(html, Regex.t()) :: html | no_return()
   def assert_html(html, %Regex{} = value) do
