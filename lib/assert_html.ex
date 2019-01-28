@@ -274,6 +274,10 @@ defmodule AssertHTML do
   defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
     html(matcher, context, css_selector, [], block_fn)
   end
+  defp html(matcher, context, css_selector, attributes, block_fn) when is_map(attributes) do
+    attributes = Enum.into(attributes, [])
+    html(matcher, context, css_selector, attributes, block_fn)
+  end
 
   defp html(matcher, context, css_selector, attributes, block_fn)
        when matcher in [:assert, :refute] and
@@ -299,7 +303,7 @@ defmodule AssertHTML do
     contain_value && Matcher.contain(matcher, sub_context, contain_value)
 
     if attributes != [] do
-      Matcher.attributes(sub_context, attributes)
+      Matcher.attributes(matcher, sub_context, attributes)
     end
   end
 

@@ -97,11 +97,11 @@ defmodule AssertHTML.DSL do
   end
 
   # replace assert_html without arguments to context
-  def postwalk({:assert_html, env, nil}) do
+  defp postwalk({:assert_html, env, nil}) do
     context_var(env)
   end
 
-  def postwalk({:assert_html, env, arguments}) do
+  defp postwalk({:assert_html, env, arguments}) do
     context = context_var(env)
     {args, block} = extract_block([context | arguments], nil)
 
@@ -109,18 +109,18 @@ defmodule AssertHTML.DSL do
   end
 
   # replace refute_html without arguments to context
-  def postwalk({:refute_html, env, nil}) do
+  defp postwalk({:refute_html, env, nil}) do
     context_var(env)
   end
 
-  def postwalk({:refute_html, env, arguments}) do
+  defp postwalk({:refute_html, env, arguments}) do
     context = context_var(env)
     {args, block} = extract_block([context | arguments], nil)
 
     call_html_method(:refute, args, block)
   end
 
-  def postwalk(segment) do
+  defp postwalk(segment) do
     segment
   end
 

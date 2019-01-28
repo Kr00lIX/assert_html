@@ -11,7 +11,9 @@ defmodule AssertHTML.Debug do
   end
 
   def log(entry, level \\ :debug, metadata \\ []) do
-    Logger.log(level, fn -> to_iodata(entry) end, metadata)
+    if Application.get_env(:assert_html, :log) do
+      Logger.log(level, fn -> to_iodata(entry) end, metadata)
+    end
   end
 
   defp to_iodata(entry) when is_binary(entry), do: entry

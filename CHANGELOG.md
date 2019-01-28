@@ -2,8 +2,10 @@
 
 ## Unreleased
 
-## v0.0.2
-
+## Fixed
+- refute attributes
+  
+## v0.0.3
 
 ## Fixed
 - Checking attributes with non sting values
@@ -38,7 +40,6 @@
 ### Deleted
 - Delete `assert_html_contains(html, "text")` -> use `assert_html(html, ~r"text")` instead
 - Delete `refute_html_contains(html, "text")` -> use `refute_html(html, ~r"text")` instead
-
 - Delete `refute_html_selector(html, selector)` (use `refute_html(html, selector)` instead)
 
 ## v0.0.1

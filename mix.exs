@@ -1,7 +1,7 @@
 defmodule AssertHTML.MixProject do
   use Mix.Project
 
-  @version "0.0.3"
+  @version "0.0.4"
   @github_url "https://github.com/Kr00lIX/assert_html"
 
   def project do
