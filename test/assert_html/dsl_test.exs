@@ -125,4 +125,21 @@ defmodule AssertHTML.DSLTest do
       end
     end
   end
+
+  describe "(check attributes)" do
+    setup do
+      [html: ~S{
+        <label for="field_two">Two</label>
+        <input id="field_two" type="radio" value="two" name="field[birds]">
+      }]
+    end
+
+    test "expect refute checked without errors", %{html: html} do
+      refute_html(html, "input[type=radio][value=two]", checked: true)
+    end
+
+    test "expect check attributes as map", %{html: html} do
+      assert_html(html, "#field_two", %{"type" => "radio", "value" => "two", "name" => "field[birds]"})
+    end
+  end
 end

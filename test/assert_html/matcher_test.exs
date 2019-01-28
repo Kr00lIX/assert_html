@@ -12,51 +12,68 @@ defmodule AssertHTMLTest.MatcherTest do
     end
 
     test "raise error for unexpected attribute", %{html: html} do
-      message = ~r{Attribute `class` matched, but should haven't matched.}
-
-      assert_raise AssertionError, message, fn ->
-        attributes(html, class: nil)
+      assert_raise AssertionError, ~r{Attribute `class` shouldn't exists.}, fn ->
+        attributes(:assert, html, class: nil)
       end
+
+      attributes(:refute, html, class: nil)
     end
 
     test "expect check `class` attribute splitted by space", %{html: html} do
-      attributes(html, class: "table")
-      attributes(html, class: "table -vertical")
-      attributes(html, class: "-vertical")
+      attributes(:assert, html, class: "table")
+      attributes(:assert, html, class: "table -vertical")
+      attributes(:assert, html, class: "-vertical")
 
       message = ~r{Class `wrong_class` not found in `table -vertical` class attribute}
-
       assert_raise AssertionError, message, fn ->
-        attributes(html, class: "wrong_class")
+        attributes(:assert, html, class: "wrong_class")
+      end
+
+      attributes(:refute, html, class: "container")
+      assert_raise AssertionError, ~r"Class `-vertical` found in `table -vertical` class attribute", fn ->
+        attributes(:refute, html, class: "-vertical")
       end
     end
 
     test "expect check escaped text from `text` attribute", %{html: html} do
-      attributes(html, text: "quotes: \" & '")
-      attributes(html, text: ~r"quotes:")
+      attributes(:assert, html, text: "quotes: \" & '")
+      attributes(:assert, html, text: ~r"quotes:")
     end
 
     test "expect error if attribute not exsists", %{html: html} do
       message = "\n\nAttribute `id` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
-
       assert_raise AssertionError, message, fn ->
-        attributes(html, id: "new_element")
+        attributes(:assert, html, id: "new_element")
+      end
+
+      assert_raise AssertionError, ~r"Attribute `id` should exists.", fn ->
+        attributes(:refute, html, id: nil)
       end
     end
 
     test "expect stringify values for checking attribuites" do
       html = ~S{<input id="zoo" value="111" />}
-      attributes(html, value: 111, id: "zoo")
+      attributes(:assert, html, value: 111, id: "zoo")
+      attributes(:refute, html, value: 222)
     end
 
     test "check if attribute not exsists" do
       html = ~S{<input type="checkbox" value="111" />}
-      attributes(html, type: "checkbox", checked: nil)
+      attributes(:assert, html, type: "checkbox", checked: nil)
+      attributes(:refute, html, type: nil)
     end
 
     test "check if attribute exsists" do
       html = ~S{<input type="text" readonly value="hahaha" />}
-      attributes(html, type: "text", readonly: true)
+      attributes(:assert, html, type: "text", readonly: true)
+      attributes(:refute, html, type: "tel", readonly: false)
+
+      assert_raise AssertionError, ~r"Attribute `readonly` shouldn't exists.", fn ->
+        attributes(:assert, html, readonly: false)
+      end
+      assert_raise AssertionError, ~r"Attribute `readonly` shouldn't exists.", fn ->
+        attributes(:refute, html, readonly: true)
+      end
     end
   end
 

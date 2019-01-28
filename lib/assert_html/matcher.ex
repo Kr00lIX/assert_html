@@ -4,7 +4,7 @@ defmodule AssertHTML.Matcher do
   alias AssertHTML
   alias AssertHTML.{Selector}
 
-  @compile {:inline, assert_error: 1, raise_match: 2, raise_match: 3}
+  @compile {:inline, raise_match: 3}
 
   @typep assert_or_refute :: :assert | :refute
 
@@ -20,13 +20,13 @@ defmodule AssertHTML.Matcher do
     sub_html
   end
 
-  @spec attributes(AssertHTML.html(), AssertHTML.attributes()) :: any()
-  def attributes(html, attributes) when is_list(attributes) do
+  @spec attributes(assert_or_refute, AssertHTML.html(), AssertHTML.attributes()) :: any()
+  def attributes(matcher, html, attributes) when is_list(attributes) do
     attributes
     |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
     |> Enum.each(fn {attribute, check_value} ->
       attr_value = Selector.attribute(html, attribute)
-      match_attribute(attribute, check_value, attr_value, html)
+      match_attribute(matcher, attribute, check_value, attr_value, html)
     end)
   end
 
@@ -46,25 +46,33 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  defp match_attribute(attribute, check_value, attr_value, html)
+  @spec match_attribute(assert_or_refute, AssertHTML.attribute_name, AssertHTML.value, binary() | nil, AssertHTML.html) :: no_return
+  defp match_attribute(matcher, attribute, check_value, attr_value, html)
 
-  # attribute no exists
-  defp match_attribute(attribute, nil = _check_value, attr_value, html) do
-    raise_match(attr_value != nil, fn _ -> "Attribute `#{attribute}` matched, but should haven't matched.\n\n\t#{html}.\n" end)
+  # attribute should exists
+  defp match_attribute(matcher, attribute, check_value, attr_value, html) when check_value in [nil, true, false] do
+    raise_match(matcher, (if check_value, do: attr_value == nil, else: attr_value != nil), fn
+      :assert ->
+        if check_value,
+        do: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n",
+        else: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n"
+
+      :refute ->
+        if check_value,
+        do: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n",
+        else: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n"
+    end)
   end
 
   # attribute should not exists
-  defp match_attribute(attribute, _check_value, nil = _attr_value, html) do
-    assert_error("Attribute `#{attribute}` not found.\n\n\t#{html}\n")
+  defp match_attribute(matcher, attribute, _check_value, nil = _attr_value, html) do
+    raise_match(matcher, matcher == :assert, fn
+      _ -> "Attribute `#{attribute}` not found.\n\n\t#{html}\n"
+    end)
   end
 
-  # attribute should exists
-  defp match_attribute(_attribute, true = _check_value, _attr_value, _html) do
-    :ok
-  end
-
-  defp match_attribute(attribute, %Regex{} = check_value, attr_value, html) do
-    raise_match(!Regex.match?(check_value, attr_value), fn _ ->
+  defp match_attribute(matcher, attribute, %Regex{} = check_value, attr_value, html) do
+    raise_match(matcher, !Regex.match?(check_value, attr_value), fn _ ->
       [
         message: "Matching `#{attribute}` attribute failed.\n\n\t#{html}.\n",
         left: check_value,
@@ -73,18 +81,19 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  defp match_attribute("class", check_value, attr_value, html) do
+  defp match_attribute(matcher, "class", check_value, attr_value, html) do
     for check_class <- String.split(to_string(check_value), " ") do
-      raise_match(!String.contains?(attr_value, check_class), fn _ ->
-        "Class `#{check_class}` not found in `#{attr_value}` class attribute\n\n\t#{html}\n"
+      raise_match(matcher, !String.contains?(attr_value, check_class), fn
+        :assert -> "Class `#{check_class}` not found in `#{attr_value}` class attribute\n\n\t#{html}\n"
+        :refute -> "Class `#{check_class}` found in `#{attr_value}` class attribute\n\n\t#{html}\n"
       end)
     end
   end
 
-  defp match_attribute(attribute, check_value, attr_value, html) do
+  defp match_attribute(matcher, attribute, check_value, attr_value, html) do
     str_check_value = to_string(check_value)
 
-    raise_match(str_check_value != attr_value, fn _ ->
+    raise_match(matcher, str_check_value != attr_value, fn _ ->
       [
         message: "Comparison `#{attribute}` attribute failed.\n\n\t#{html}.\n",
         left: str_check_value,
@@ -93,20 +102,16 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  defp raise_match(check \\ :assert, condition, message_fn) when check in [:assert, :refute] do
+  defp raise_match(check, condition, message_fn) when check in [:assert, :refute] do
     cond do
       check == :assert -> condition
       check == :refute -> !condition
       true -> false
     end
     |> if do
-      assert_error(message_fn.(check))
+      message_or_args = message_fn.(check)
+      args = (is_list(message_or_args) && message_or_args) || [message: message_or_args]
+      raise ExUnit.AssertionError, args
     end
-  end
-
-  defp assert_error(message_or_args) do
-    args = (is_list(message_or_args) && message_or_args) || [message: message_or_args]
-
-    raise ExUnit.AssertionError, args
   end
 end
