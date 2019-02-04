@@ -8,7 +8,7 @@ defmodule AssertHTML.MixProject do
     [
       app: :assert_html,
       version: @version,
-      elixir: "~> 1.0",
+      elixir: ">= 1.3.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 

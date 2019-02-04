@@ -1,7 +1,11 @@
 # AssertHTML
 
-AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
+[![Build Status](https://travis-ci.org/Kr00lIX/assert_html.svg?branch=master)](https://travis-ci.org/Kr00lIX/assert_html)
+[![Hex pm](https://img.shields.io/hexpm/v/assert_html.svg?style=flat)](https://hex.pm/packages/assert_html)
+[![Coverage Status](https://coveralls.io/repos/github/Kr00lIX/assert_html/badge.svg?branch=master)](https://coveralls.io/github/Kr00lIX/assert_html?branch=master)
 
+
+AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
 
 ## Usage
 

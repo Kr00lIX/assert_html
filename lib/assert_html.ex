@@ -1,6 +1,22 @@
 defmodule AssertHTML do
   @moduledoc ~s"""
   AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
+
+  ## Usage
+
+  ### Check selector
+  `assert_html(html, ".css .selector .exsits")` - assert error if element doesn't exists in selector path.
+  `refute_html(html, ".css .selector")` - assert error if element doesn't exists in selector path.
+
+  ### Check Attributes
+  Supports meta attributes:
+
+  `:text` –
+
+  `:match` - contain value.
+
+  ##
+
   """
 
   alias AssertHTML.{Debug, Matcher, Selector}

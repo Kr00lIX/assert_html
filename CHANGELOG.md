@@ -2,12 +2,15 @@
 
 ## Unreleased
 
+
+## v0.0.4
+
 ## Fixed
 - refute attributes
   
 ## v0.0.3
 
-## Fixed
+### Fixed
 - Checking attributes with non sting values
 - Check no existing attributes `attribute_name: nil`
 
