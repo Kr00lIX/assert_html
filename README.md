@@ -11,8 +11,8 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
 
 ### Contains
   `assert_html(html, ~r{Hello World})` - match sting in HTML  
-  `refute_html(html, ~r{Another World})` - 
-  
+  `refute_html(html, ~r{Another World})` - shold not contain string in HTML
+
   ```
    assert_html(html, ".content") do
      assert_html(~r{Hello World})
@@ -21,9 +21,9 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
       
 ### CSS selectors
 
- `assert_html(html, ".css .selector")` - check element exists in CSS selector path
+`assert_html(html, ".css .selector")` - check element exists in CSS selector path
 
-  `refute_html(html, ".errors .error")` - element not exists in path
+`refute_html(html, ".errors .error")` - element not exists in path
 
 ### Check attributes
 
@@ -72,25 +72,29 @@ defmodule ExampleControllerTest do
 end
 ```
 
-See [HexDocs](https://hexdocs.pm/Kr00lIX/assert_html.html) for additional documentation.
+Documentation can be found at [https://hexdocs.pm/assert_html](https://hexdocs.pm/assert_html/AssertHTML.html).
 
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `assert_html` to your list of dependencies in `mix.exs`:
+It's available in Hex, the package can be installed as:
+
+Add `assert_html` to your list of dependencies in mix.exs:
 
 ```elixir
 def deps do
   [
-    {:assert_html, ">= 0.0.1", only: [:test]}
+    {:assert_html, ">= 0.0.1", only: :test}
   ]
 end
 ```
+Then run `mix deps.get` to get the package.
+
 
 ## Contribution
 Feel free to send your PR with proposals, improvements or corrections 😉.
 
 
 ## License
-This software is licensed under the MIT license.
+
+This software is licensed under [the MIT license](LICENSE.md).

@@ -9,6 +9,7 @@ defmodule AssertHTML.MixProject do
       app: :assert_html,
       version: @version,
       elixir: ">= 1.3.0",
+      build_embedded: Mix.env == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -26,7 +27,11 @@ defmodule AssertHTML.MixProject do
       preferred_cli_env: [coveralls: :test, "coveralls.travis": :test],
 
       # dev
-      dialyzer: [ignore_warnings: ".dialyzer_ignore.exs"]
+      dialyzer: [
+        ignore_warnings: ".dialyzer_ignore.exs",
+        list_unused_filters: true,
+        remove_defaults: [:unknown]
+      ]
     ]
   end
 
@@ -66,12 +71,12 @@ defmodule AssertHTML.MixProject do
   # Settings for publishing in Hex package manager:
   defp package do
     %{
-      package: "assert_html",
+      name: "assert_html",
       contributors: ["Kr00lIX"],
       maintainers: ["Anatoliy Kovalchuk"],
       links: %{"GitHub" => @github_url},
-      licenses: ["LICENSE.md"],
-      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md)
+      licenses: ["MIT"],
+      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md),
     }
   end
 end

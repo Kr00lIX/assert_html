@@ -238,12 +238,6 @@ defmodule AssertHTML do
     html(:refute, html, nil, match: value)
   end
 
-  @spec refute_html(html, block_fn) :: html | no_return()
-  def refute_html(html, block_fn) when is_binary(html) and is_function(block_fn) do
-    block_fn.(html)
-    html
-  end
-
   @spec refute_html(html, css_selector) :: html | no_return()
   def refute_html(html, css_selector) when is_binary(html) and is_binary(css_selector) do
     html(:refute, html, css_selector)
