@@ -19,7 +19,8 @@ defmodule AssertHTML do
 
   """
 
-  alias AssertHTML.{Debug, Matcher, Selector}
+  alias AssertHTML.{Debug, Matcher, Selector, Parser}
+  import ExUnit.Assertions
 
   @typedoc ~S"""
   CSS selector
@@ -298,12 +299,34 @@ defmodule AssertHTML do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
     sub_context = get_context(%{matcher: matcher, context: context, css_selector: css_selector, attributes: attributes})
+
+    # check metaattribute :count
+    {count_value, attributes} = Keyword.pop(attributes, :count)
+    check_count(%{count_value: count_value, context: context, css_selector: css_selector})
+
     check_attributes(matcher, sub_context, attributes)
 
     # call inside block
     block_fn && block_fn.(sub_context)
 
     context
+  end
+
+  defp check_count(%{css_selector: nil}) do
+    false
+  end
+
+  defp check_count(%{count_value: nil}) do
+    false
+  end
+
+  defp check_count(%{context: context, count_value: count_value, css_selector: css_selector}) do
+    if count_value >= 0 do
+      count_elements = Parser.find(context, css_selector)
+      |> Enum.count()
+      error_msg = "Expected #{count_value} element(s). Got #{count_elements} element(s)."
+      assert count_value == count_elements, error_msg
+    end
   end
 
   defp check_attributes(matcher, sub_context, attributes) do

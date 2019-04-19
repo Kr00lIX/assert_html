@@ -55,13 +55,23 @@ defmodule AssertHTMLTest do
       html = ~S{
         <div id="main" class="container">
           <h1>Hello</h1>
-          <p class="description highligh">
+          <p class="description highlight">
             Long Read Paragraph
+          </p>
+          <p>
+            Second Paragraph
           </p>
           World
         </div>
       }
       [html: html]
+    end
+
+    test "expect count attribute to check number of elements found", %{html: html} do
+      assert_html(html, "#main", [count: 1], fn sub_html ->
+        assert_html(sub_html, "h1", count: 1)
+        assert_html(sub_html, "p", count: 2)
+      end)
     end
 
     test "expect pass equal attributes", %{html: html} do
@@ -73,7 +83,7 @@ defmodule AssertHTMLTest do
     end
   end
 
-  describe ".asserth_html (check contains)" do
+  describe ".assert_html (check contains)" do
     setup do
       [html: ~S{
         <div class="content">
