@@ -36,6 +36,10 @@ defmodule AssertHTML do
       |> assert_html("title", count: 1, match: "PAGE")
       # Page has one link with href value "/signup"
       |> assert_html("a[href='/signup']", count: 1)
+      # Page has at least one link
+      |> assert_html("a", min: 1)
+      # Page has at most two links
+      |> assert_html("a", max: 2)
       # Page contains no forms
       |> refute_html("form")
     end

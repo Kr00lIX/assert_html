@@ -45,6 +45,10 @@ defmodule YourAppWeb.PageControllerTest do
     |> assert_html("title", count: 1, match: "PAGE")
     # Page has one link with href value "/signup"
     |> assert_html("a[href='/signup']", count: 1)
+    # Page has at least one link
+    |> assert_html("a", min: 1)
+    # Page has at most two links
+    |> assert_html("a", max: 2)
     # Page contains no forms
     |> refute_html("form")
   end
@@ -66,15 +70,6 @@ end
 `assert_html(html, ".css .selector")` - check element exists in CSS selector path
 
 `refute_html(html, ".errors .error")` - element not exists in path
-
-### Check count of elements
-
-```elixir
-assert_html(html, "#main", [count: 1], fn sub_html ->
-  assert_html(sub_html, "h1", count: 1)
-  assert_html(sub_html, "p", count: 2)
-end)
-```
 
 ### Check attributes
 
