@@ -82,6 +82,14 @@ defmodule AssertHTMLTest do
       end)
     end
 
+    test "expect max meta-attribute that number of elements found is less than or equal",
+      %{html: html} do
+      assert_html(html, "#main", [max: 1], fn sub_html ->
+        assert_html(sub_html, "h1", max: 1)
+        assert_html(sub_html, "p", max: 2)
+      end)
+    end
+
     test "expect pass equal attributes", %{html: html} do
       assert_html(html, "#main", [class: "container", id: "main", text: "World"], fn sub_html ->
         assert_html(sub_html, "h1", class: nil, text: "Hello")
