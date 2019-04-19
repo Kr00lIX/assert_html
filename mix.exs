@@ -8,7 +8,7 @@ defmodule AssertHTML.MixProject do
     [
       app: :assert_html,
       version: @version,
-      elixir: ">= 1.3.0",
+      elixir: ">= 1.6.0",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -24,7 +24,7 @@ defmodule AssertHTML.MixProject do
 
       # Test
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test, "coveralls.travis": :test],
+      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
 
       # dev
       dialyzer: [
@@ -45,16 +45,16 @@ defmodule AssertHTML.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:floki, ">= 0.20.3"},
+      {:floki, "~> 0.21"},
 
       # Test
-      {:excoveralls, "~> 0.8", only: :test},
-      {:junit_formatter, "~> 2.1", only: :test},
-      {:credo, "~> 0.8", only: [:dev, :test]},
+      {:excoveralls, "~> 0.10", only: :test},
+      {:junit_formatter, "~> 3.0", only: :test},
+      {:credo, "~> 1.0", only: [:dev, :test]},
 
       # Dev
-      {:dialyxir, "~> 1.0.0-rc.4", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.0.0-rc.6", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.20", only: :dev, runtime: false}
     ]
   end
 
