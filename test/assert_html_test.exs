@@ -67,10 +67,18 @@ defmodule AssertHTMLTest do
       [html: html]
     end
 
-    test "expect count attribute to check number of elements found", %{html: html} do
+    test "expect count meta-attribute to equal number of elements found", %{html: html} do
       assert_html(html, "#main", [count: 1], fn sub_html ->
         assert_html(sub_html, "h1", count: 1)
         assert_html(sub_html, "p", count: 2)
+      end)
+    end
+
+    test "expect min meta-attribute that number of elements found is greater than or equal",
+      %{html: html} do
+      assert_html(html, "#main", [min: 1], fn sub_html ->
+        assert_html(sub_html, "h1", min: 1)
+        assert_html(sub_html, "p", min: 2)
       end)
     end
 

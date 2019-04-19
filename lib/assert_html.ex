@@ -324,9 +324,13 @@ defmodule AssertHTML do
 
     sub_context = get_context(%{matcher: matcher, context: context, css_selector: css_selector, attributes: attributes})
 
-    # check metaattribute :count
+    # check :count meta-attribute
     {count_value, attributes} = Keyword.pop(attributes, :count)
     count_value && check_count(%{count_value: count_value, context: context, css_selector: css_selector})
+
+    # check :min meta-attribute
+    {min_value, attributes} = Keyword.pop(attributes, :min)
+    min_value && check_min(%{min_value: min_value, context: context, css_selector: css_selector})
 
     check_attributes(matcher, sub_context, attributes)
 
@@ -342,6 +346,15 @@ defmodule AssertHTML do
       |> Enum.count()
       error_msg = "Expected #{count_value} element(s). Got #{count_elements} element(s)."
       assert count_value == count_elements, error_msg
+    end
+  end
+
+  defp check_min(%{context: context, min_value: min_value, css_selector: css_selector}) do
+    if min_value >= 0 do
+      count_elements = Parser.find(context, css_selector)
+      |> Enum.count()
+      error_msg = "Expected at least #{min_value} element(s). Got #{count_elements} element(s)."
+      assert count_elements >= min_value, error_msg
     end
   end
 
