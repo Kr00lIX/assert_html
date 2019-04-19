@@ -14,7 +14,7 @@ defmodule AssertHTML.MixProject do
       deps: deps(),
 
       # Hex
-      description: "ExUnit's assert helpers for testing rendered HTML backed by Floki.",
+      description: "ExUnit assert helpers for testing rendered HTML.",
       package: package(),
 
       # Docs
@@ -24,7 +24,13 @@ defmodule AssertHTML.MixProject do
 
       # Test
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.travis": :test
+      ],
 
       # dev
       dialyzer: [
@@ -54,7 +60,7 @@ defmodule AssertHTML.MixProject do
 
       # Dev
       {:dialyxir, "~> 1.0.0-rc.6", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.20", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.18", only: :dev, runtime: false}
     ]
   end
 

@@ -1,22 +1,46 @@
 defmodule AssertHTML do
   @moduledoc ~s"""
-  AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
+  AssertHTML adds ExUnit assert helpers for testing rendered HTML using CSS selectors.
 
-  ## Usage
+  ## Usage in Phoenix Controller and Integration Test
 
-  ### Check selector
-  `assert_html(html, ".css .selector .exsits")` - assert error if element doesn't exists in selector path.
-  `refute_html(html, ".css .selector")` - assert error if element doesn't exists in selector path.
+  Assuming the `html_response(conn, 200)` returns:
+  ```html
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>PAGE TITLE</title>
+  </head>
+  <body>
+    <a href="/signup">Sign up</a>
+    <a href="/help">Help</a>
+  </body>
+  </html>
+  ```
 
-  ### Check Attributes
-  Supports meta attributes:
+  An example controller test:
+  ```elixir
+  defmodule YourAppWeb.PageControllerTest do
+    use YourAppWeb.ConnCase, async: true
 
-  `:text` –
+    test "should get index", %{conn: conn} do
+      conn = conn
+      |> get(Routes.page_path(conn, :index))
 
-  `:match` - contain value.
-
-  ##
-
+      html_response(conn, 200)
+      # Page title is "PAGE TITLE"
+      |> assert_html("title", "PAGE TITLE")
+      # Page title is "PAGE TITLE" and there is only one title element
+      |> assert_html("title", count: 1, text: "PAGE TITLE")
+      # Page title matches "PAGE" and there is only one title element
+      |> assert_html("title", count: 1, match: "PAGE")
+      # Page has one link with href value "/signup"
+      |> assert_html("a[href='/signup']", count: 1)
+      # Page contains no forms
+      |> refute_html("form")
+    end
+  end
+  ```
   """
 
   alias AssertHTML.{Debug, Matcher, Selector, Parser}
@@ -27,30 +51,30 @@ defmodule AssertHTML do
 
   ## Supported selectors
 
-  | Pattern         | Description                  |
-  |-----------------|------------------------------|
-  | *               | any element                  |
-  | E               | an element of type `E`       |
-  | E[foo]          | an `E` element with a "foo" attribute |
-  | E[foo="bar"]    | an E element whose "foo" attribute value is exactly equal to "bar" |
-  | E[foo~="bar"]   | an E element whose "foo" attribute value is a list of whitespace-separated values, one of which is exactly equal to "bar" |
-  | E[foo^="bar"]   | an E element whose "foo" attribute value begins exactly with the string "bar" |
-  | E[foo$="bar"]   | an E element whose "foo" attribute value ends exactly with the string "bar" |
-  | E[foo*="bar"]   | an E element whose "foo" attribute value contains the substring "bar" |
-  | E[foo\|="en"]    | an E element whose "foo" attribute has a hyphen-separated list of values beginning (from the left) with "en" |
-  | E:nth-child(n)  | an E element, the n-th child of its parent |
-  | E:first-child   | an E element, first child of its parent |
-  | E:last-child   | an E element, last child of its parent |
-  | E:nth-of-type(n)  | an E element, the n-th child of its type among its siblings |
-  | E:first-of-type   | an E element, first child of its type among its siblings |
-  | E:last-of-type   | an E element, last child of its type among its siblings |
-  | E.warning       | an E element whose class is "warning" |
-  | E#myid          | an E element with ID equal to "myid" |
-  | E:not(s)        | an E element that does not match simple selector s |
-  | E F             | an F element descendant of an E element |
-  | E > F           | an F element child of an E element |
-  | E + F           | an F element immediately preceded by an E element |
-  | E ~ F           | an F element preceded by an E element |
+  | Pattern          | Description                  |
+  |------------------|------------------------------|
+  | *                | any element                  |
+  | E                | an element of type `E`       |
+  | E[foo]           | an `E` element with a "foo" attribute |
+  | E[foo="bar"]     | an `E` element whose "foo" attribute value is exactly equal to "bar" |
+  | E[foo~="bar"]    | an `E` element whose "foo" attribute value is a list of whitespace-separated values, one of which is exactly equal to "bar" |
+  | E[foo^="bar"]    | an `E` element whose "foo" attribute value begins exactly with the string "bar" |
+  | E[foo$="bar"]    | an `E` element whose "foo" attribute value ends exactly with the string "bar" |
+  | E[foo*="bar"]    | an `E` element whose "foo" attribute value contains the substring "bar" |
+  | E[foo\|="en"]    | an `E` element whose "foo" attribute has a hyphen-separated list of values beginning (from the left) with "en" |
+  | E:nth-child(n)   | an `E` element, the n-th child of its parent |
+  | E:first-child    | an `E` element, first child of its parent |
+  | E:last-child     | an `E` element, last child of its parent |
+  | E:nth-of-type(n) | an `E` element, the n-th child of its type among its siblings |
+  | E:first-of-type  | an `E` element, first child of its type among its siblings |
+  | E:last-of-type   | an `E` element, last child of its type among its siblings |
+  | E.warning        | an `E` element whose class is "warning" |
+  | E#myid           | an `E` element with ID equal to "myid" |
+  | E:not(s)         | an `E` element that does not match simple selector s |
+  | E F              | an `F` element descendant of an `E` element |
+  | E > F            | an `F` element child of an `E` element |
+  | E + F            | an `F` element immediately preceded by an `E` element |
+  | E ~ F            | an `F` element preceded by an `E` element |
 
   """
   @type css_selector :: String.t()
@@ -67,7 +91,7 @@ defmodule AssertHTML do
 
   @typedoc """
   Checking value
-  - if nil should not exists
+  - if nil should not exist
 
   """
   @type value :: nil | String.t() | Regex.t()
@@ -102,7 +126,7 @@ defmodule AssertHTML do
   Asserts an attributes in HTML element
 
   ## assert attributes
-  - `text` – asserts an text element in HTML
+  - `:text` – asserts a text element in HTML
   - `:match` - asserts containing value in html
 
   ```
@@ -117,7 +141,7 @@ defmodule AssertHTML do
 
   #### Examples check :text
 
-  Asserts an text element in HTML
+  Asserts a text element in HTML
 
       iex> html = ~S{<h1 class="title">Header</h1>}
       ...> assert_html(html, text: "Header")
@@ -162,7 +186,7 @@ defmodule AssertHTML do
       assert_html(html, match: ~r{<p>Hello</p>})
       assert_html(html, match: "<p>Hello</p>")
 
-      \# Asserts an text element in HTML
+      \# Asserts a text element in HTML
 
   ### Examples
 
