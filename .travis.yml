@@ -12,10 +12,6 @@ otp_release: 21.3
 matrix:
   include:
     - elixir: 1.7.0
-      otp_release: 20.2
-    - elixir: 1.6.0
-      otp_release: 20.1
-    - elixir: 1.5.2
-      otp_release: 18.1  
+      otp_release: 21.1
 
-script: mix coveralls.travis
+script: MIX_ENV=test mix coveralls.travis
