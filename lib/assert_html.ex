@@ -326,7 +326,7 @@ defmodule AssertHTML do
 
     # check metaattribute :count
     {count_value, attributes} = Keyword.pop(attributes, :count)
-    check_count(%{count_value: count_value, context: context, css_selector: css_selector})
+    count_value && check_count(%{count_value: count_value, context: context, css_selector: css_selector})
 
     check_attributes(matcher, sub_context, attributes)
 
@@ -334,14 +334,6 @@ defmodule AssertHTML do
     block_fn && block_fn.(sub_context)
 
     context
-  end
-
-  defp check_count(%{css_selector: nil}) do
-    false
-  end
-
-  defp check_count(%{count_value: nil}) do
-    false
   end
 
   defp check_count(%{context: context, count_value: count_value, css_selector: css_selector}) do
