@@ -25,6 +25,15 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
 
 `refute_html(html, ".errors .error")` - element not exists in path
 
+### Check count of elements
+
+```elixir
+assert_html(html, "#main", [count: 1], fn sub_html ->
+  assert_html(sub_html, "h1", count: 1)
+  assert_html(sub_html, "p", count: 2)
+end)
+```
+
 ### Check attributes
 
 ```elixir

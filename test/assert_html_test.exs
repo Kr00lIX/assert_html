@@ -78,7 +78,7 @@ defmodule AssertHTMLTest do
       assert_html(html, "#main", [class: "container", id: "main", text: "World"], fn sub_html ->
         assert_html(sub_html, "h1", class: nil, text: "Hello")
         refute_html(sub_html, "h2")
-        assert_html(sub_html, "p", class: "highligh", text: ~r"Read")
+        assert_html(sub_html, "p", class: "highlight", text: ~r"Read")
       end)
     end
   end
