@@ -15,10 +15,14 @@ defmodule AssertHTML.Matcher do
     # found more than one element
     if length(docs) > 1 do
       raise_match(matcher, matcher == :assert, fn
-        :assert -> "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{html}\n"
-        :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
-      end)
+        :assert ->
+          "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{
+            html
+          }\n"
 
+        :refute ->
+          "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
+      end)
     else
       raise_match(matcher, docs == [], fn
         :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
@@ -55,21 +59,21 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  @spec match_attribute(assert_or_refute, AssertHTML.attribute_name, AssertHTML.value, binary() | nil, AssertHTML.html) :: no_return
+  @spec match_attribute(assert_or_refute, AssertHTML.attribute_name(), AssertHTML.value(), binary() | nil, AssertHTML.html()) :: no_return
   defp match_attribute(matcher, attribute, check_value, attr_value, html)
 
   # attribute should exists
   defp match_attribute(matcher, attribute, check_value, attr_value, html) when check_value in [nil, true, false] do
-    raise_match(matcher, (if check_value, do: attr_value == nil, else: attr_value != nil), fn
+    raise_match(matcher, if(check_value, do: attr_value == nil, else: attr_value != nil), fn
       :assert ->
         if check_value,
-        do: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n",
-        else: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n"
+          do: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n",
+          else: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n"
 
       :refute ->
         if check_value,
-        do: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n",
-        else: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n"
+          do: "Attribute `#{attribute}` shouldn't exists.\n\n\t#{html}\n",
+          else: "Attribute `#{attribute}` should exists.\n\n\t#{html}\n"
     end)
   end
 

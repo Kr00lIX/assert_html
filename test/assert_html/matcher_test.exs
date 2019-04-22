@@ -25,11 +25,13 @@ defmodule AssertHTMLTest.MatcherTest do
       attributes(:assert, html, class: "-vertical")
 
       message = ~r{Class `wrong_class` not found in `table -vertical` class attribute}
+
       assert_raise AssertionError, message, fn ->
         attributes(:assert, html, class: "wrong_class")
       end
 
       attributes(:refute, html, class: "container")
+
       assert_raise AssertionError, ~r"Class `-vertical` found in `table -vertical` class attribute", fn ->
         attributes(:refute, html, class: "-vertical")
       end
@@ -42,6 +44,7 @@ defmodule AssertHTMLTest.MatcherTest do
 
     test "expect error if attribute not exsists", %{html: html} do
       message = "\n\nAttribute `id` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
+
       assert_raise AssertionError, message, fn ->
         attributes(:assert, html, id: "new_element")
       end
@@ -71,6 +74,7 @@ defmodule AssertHTMLTest.MatcherTest do
       assert_raise AssertionError, ~r"Attribute `readonly` shouldn't exists.", fn ->
         attributes(:assert, html, readonly: false)
       end
+
       assert_raise AssertionError, ~r"Attribute `readonly` shouldn't exists.", fn ->
         attributes(:refute, html, readonly: true)
       end

@@ -11,7 +11,7 @@ AssertHTML is an Elixir library for parsing and extracting data from HTML and XM
 
 ### Contains
   `assert_html(html, ~r{Hello World})` - match string in HTML  
-  `refute_html(html, ~r{Another World})` - shold not contain string in HTML
+  `refute_html(html, ~r{Another World})` - should not contain string in HTML
 
   ```
    assert_html(html, ".content") do

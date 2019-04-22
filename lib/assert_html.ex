@@ -11,11 +11,11 @@ defmodule AssertHTML do
   ### Check Attributes
   Supports meta attributes:
 
-  `:text` –
+  * `:text` – text in element
+  * `:match` - contain value.
 
-  `:match` - contain value.
 
-  ##
+
 
   """
 
@@ -284,6 +284,7 @@ defmodule AssertHTML do
   defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
     html(matcher, context, css_selector, [], block_fn)
   end
+
   defp html(matcher, context, css_selector, attributes, block_fn) when is_map(attributes) do
     attributes = Enum.into(attributes, [])
     html(matcher, context, css_selector, attributes, block_fn)

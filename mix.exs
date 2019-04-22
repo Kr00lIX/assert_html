@@ -9,7 +9,7 @@ defmodule AssertHTML.MixProject do
       app: :assert_html,
       version: @version,
       elixir: ">= 1.3.0",
-      build_embedded: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -77,7 +77,7 @@ defmodule AssertHTML.MixProject do
       maintainers: ["Anatoliy Kovalchuk"],
       links: %{"GitHub" => @github_url},
       licenses: ["MIT"],
-      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md),
+      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md)
     }
   end
 end
