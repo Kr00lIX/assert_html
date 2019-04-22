@@ -25,7 +25,7 @@ defmodule AssertHTMLTest do
       refute_html(html, ".container h5")
     end
 
-    test "expect pass to caballack selected html", %{html: html} do
+    test "expect pass to callback selected html", %{html: html} do
       result_html =
         assert_html(html, ".container", fn sub_html ->
           assert sub_html == "<div class=\"container\"><h1>Hello</h1><p class=\"description\">\n            Paragraph\n          </p><h1>World</h1></div>"
@@ -128,6 +128,40 @@ defmodule AssertHTMLTest do
       end
 
       refute_html(html, match: "Hello World!!!!")
+    end
+  end
+
+  describe ".asseth_html (multiply elements)" do
+    setup do
+      [html: ~S{
+        <div class="container">
+          <h1>Header</h1>
+          <ul>
+            <li class="item">First</li>
+            <li class="item">Second</li>
+            <li class="item">Third</li>
+          </ul>
+        </div>
+      }]
+    end
+
+    test "check `first-child` or `nth-of-type` css selectors", %{html: html} do
+      assert_html(html, ".container", fn sub_html ->
+        assert_html(sub_html, ".item:first-child", "First")
+        assert_html(sub_html, ".item:nth-child(2)", "Second")
+        assert_html(sub_html, ".item:nth-of-type(3)", "Third")
+        refute_html(sub_html, ".item:nth-child(4)")
+      end)
+    end
+
+    test "raise error if gets more than on element by selector", %{html: html} do
+      assert_raise AssertionError, ~r"Found more than one element by `.container li` selector.", fn ->
+        assert_html(html, ".container li", "First")
+      end
+
+      assert_raise AssertionError, ~r"Selector `.container li` succeeded, but should have failed.", fn ->
+        refute_html(html, ".container li")
+      end
     end
   end
 end

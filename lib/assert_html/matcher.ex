@@ -2,7 +2,7 @@ defmodule AssertHTML.Matcher do
   @moduledoc false
 
   alias AssertHTML
-  alias AssertHTML.{Selector}
+  alias AssertHTML.{Parser, Selector}
 
   @compile {:inline, raise_match: 3}
 
@@ -10,14 +10,23 @@ defmodule AssertHTML.Matcher do
 
   @spec selector(assert_or_refute, binary, binary()) :: nil | AssertHTML.html()
   def selector(matcher, html, selector) when is_binary(html) and is_binary(selector) do
-    sub_html = Selector.find(html, selector)
+    docs = Parser.find(html, selector)
 
-    raise_match(matcher, sub_html == nil, fn
-      :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
-      :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
-    end)
+    # found more than one element
+    if length(docs) > 1 do
+      raise_match(matcher, matcher == :assert, fn
+        :assert -> "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{html}\n"
+        :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
+      end)
 
-    sub_html
+    else
+      raise_match(matcher, docs == [], fn
+        :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
+        :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
+      end)
+    end
+
+    Parser.to_html(docs)
   end
 
   @spec attributes(assert_or_refute, AssertHTML.html(), AssertHTML.attributes()) :: any()
