@@ -15,6 +15,7 @@ defmodule AssertHTML.MixProject do
 
       # Hex
       description: "ExUnit's assert helpers for testing rendered HTML backed by Floki.",
+      source_url: @github_url,
       package: package(),
 
       # Docs
@@ -45,7 +46,7 @@ defmodule AssertHTML.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:floki, ">= 0.20.3"},
+      {:floki, "~> 0.21"},
 
       # Test
       {:excoveralls, "~> 0.8", only: :test},
