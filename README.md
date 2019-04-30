@@ -3,11 +3,60 @@
 [![Build Status](https://travis-ci.org/Kr00lIX/assert_html.svg?branch=master)](https://travis-ci.org/Kr00lIX/assert_html)
 [![Hex pm](https://img.shields.io/hexpm/v/assert_html.svg?style=flat)](https://hex.pm/packages/assert_html)
 [![Coverage Status](https://coveralls.io/repos/github/Kr00lIX/assert_html/badge.svg?branch=master)](https://coveralls.io/github/Kr00lIX/assert_html?branch=master)
+ 
+ 
+AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.		 AssertHTML adds ExUnit assert helpers for testing rendered HTML using CSS selectors.
 
+It is very useful in Phoenix Controller and Integration tests.
 
-AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
-
+ 
 ## Usage
+
+
+### Usage in Phoenix Controller and Integration Test
+
+Assuming the `html_response(conn, 200)` returns:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PAGE TITLE</title>
+  </head>
+  <body>
+    <a href="/signup">Sign up</a>
+    <a href="/help">Help</a>
+  </body>
+</html>
+```
+
+An example controller test:
+
+```elixir
+defmodule YourAppWeb.PageControllerTest do
+  use YourAppWeb.ConnCase, async: true
+
+  test "should get index", %{conn: conn} do
+    conn = conn
+    |> get(Routes.page_path(conn, :index))
+
+    html_response(conn, 200)
+    # Page title is "PAGE TITLE"
+    |> assert_html("title", "PAGE TITLE")
+    # Page title is "PAGE TITLE" and there is only one title element
+    |> assert_html("title", count: 1, text: "PAGE TITLE")
+    # Page title matches "PAGE" and there is only one title element
+    |> assert_html("title", count: 1, match: "PAGE")
+    # Page has one link with href value "/signup"
+    |> assert_html("a[href='/signup']", count: 1)
+    # Page has at least one link
+    |> assert_html("a", min: 1)
+    # Page has at most two links
+    |> assert_html("a", max: 2)
+    # Page contains no forms
+    |> refute_html("form")
+  end
+end
+```
 
 ### Contains
   `assert_html(html, ~r{Hello World})` - match string in HTML  

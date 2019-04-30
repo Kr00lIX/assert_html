@@ -1,8 +1,50 @@
 defmodule AssertHTML do
   @moduledoc ~s"""
-  AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.
+   AssertHTML adds ExUnit assert helpers for testing rendered HTML using CSS selectors.
 
-  ## Usage
+  ## Usage in Phoenix Controller and Integration Test
+
+  Assuming the `html_response(conn, 200)` returns:
+  ```html
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>PAGE TITLE</title>
+    </head>
+    <body>
+      <a href="/signup">Sign up</a>
+      <a href="/help">Help</a>
+    </body>
+  </html>
+  ```
+
+  An example controller test:
+  ```elixir
+  defmodule YourAppWeb.PageControllerTest do
+    use YourAppWeb.ConnCase, async: true
+
+    test "should get index", %{conn: conn} do
+      conn = conn
+      |> get(Routes.page_path(conn, :index))
+
+      html_response(conn, 200)
+      # Page title is "PAGE TITLE"
+      |> assert_html("title", "PAGE TITLE")
+      # Page title is "PAGE TITLE" and there is only one title element
+      |> assert_html("title", count: 1, text: "PAGE TITLE")
+      # Page title matches "PAGE" and there is only one title element
+      |> assert_html("title", count: 1, match: "PAGE")
+      # Page has one link with href value "/signup"
+      |> assert_html("a[href='/signup']", count: 1)
+      # Page has at least one link
+      |> assert_html("a", min: 1)
+      # Page has at most two links
+      |> assert_html("a", max: 2)
+      # Page contains no forms
+      |> refute_html("form")
+    end
+  end
+  ```
 
   ### Check selector
   `assert_html(html, ".css .selector .exsits")` - assert error if element doesn't exists in selector path.
@@ -14,12 +56,11 @@ defmodule AssertHTML do
   * `:text` – text in element
   * `:match` - contain value.
 
-
-
-
   """
 
   alias AssertHTML.{Debug, Matcher, Selector}
+
+  @collection_checks [:match, :count, :min, :max]
 
   @typedoc ~S"""
   CSS selector
@@ -44,7 +85,7 @@ defmodule AssertHTML do
   | E:first-of-type   | an E element, first child of its type among its siblings |
   | E:last-of-type   | an E element, last child of its type among its siblings |
   | E.warning       | an E element whose class is "warning" |
-  | E#myid          | an E element with ID equal to "myid" |
+  | E#myid          | an `E` element with ID equal to "myid" |
   | E:not(s)        | an E element that does not match simple selector s |
   | E F             | an F element descendant of an E element |
   | E > F           | an F element child of an E element |
@@ -66,7 +107,7 @@ defmodule AssertHTML do
 
   @typedoc """
   Checking value
-  - if nil should not exists
+  - if nil should not exist
 
   """
   @type value :: nil | String.t() | Regex.t()
@@ -101,8 +142,8 @@ defmodule AssertHTML do
   Asserts an attributes in HTML element
 
   ## assert attributes
-  - `text` – asserts an text element in HTML
-  - `:match` - asserts containing value in html
+  - `:text` – asserts a text element in HTML
+  - `:match` - asserts containing value in HTML
 
   ```
   iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
@@ -116,7 +157,7 @@ defmodule AssertHTML do
 
   #### Examples check :text
 
-  Asserts an text element in HTML
+  Asserts a text element in HTML
 
       iex> html = ~S{<h1 class="title">Header</h1>}
       ...> assert_html(html, text: "Header")
@@ -161,7 +202,7 @@ defmodule AssertHTML do
       assert_html(html, match: ~r{<p>Hello</p>})
       assert_html(html, match: "<p>Hello</p>")
 
-      \# Asserts an text element in HTML
+      \# Asserts a text element in HTML
 
   ### Examples
 
@@ -284,7 +325,6 @@ defmodule AssertHTML do
   defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
     html(matcher, context, css_selector, [], block_fn)
   end
-
   defp html(matcher, context, css_selector, attributes, block_fn) when is_map(attributes) do
     attributes = Enum.into(attributes, [])
     html(matcher, context, css_selector, attributes, block_fn)
@@ -298,35 +338,80 @@ defmodule AssertHTML do
               (is_function(block_fn) or is_nil(block_fn)) do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
-    sub_context = get_context(%{matcher: matcher, context: context, css_selector: css_selector, attributes: attributes})
-    check_attributes(matcher, sub_context, attributes)
+    {collection_params, attributes_params} = Keyword.split(attributes, @collection_checks)
 
-    # call inside block
-    block_fn && block_fn.(sub_context)
+    ## collection checks
+
+    # check :count, :min, :max and :match collection
+    check_collection(matcher, context, css_selector, collection_params)
+
+
+    ## element checks
+    if attributes_params != [] do
+      sub_context = get_context(matcher, context, css_selector, attributes_params)
+      check_element(matcher, sub_context, attributes_params)
+
+      # call inside block
+      block_fn && block_fn.(sub_context)
+    else
+      # call inside block
+      block_fn && block_fn.(context)
+    end
+
+    # if ! has_collection_checks? do
+    #   Matcher.selector(matcher, context, css_selector)
+    # end
 
     context
   end
 
-  defp check_attributes(matcher, sub_context, attributes) do
-    {contain_value, attributes} = Keyword.pop(attributes, :match)
+  defp check_element(_matcher, _sub_context, []) do
+    :skip
+  end
+  defp check_element(matcher, sub_context, attributes) do
+    Matcher.attributes(matcher, sub_context, attributes)
+  end
 
-    # check metattribute :match
+  defp check_collection(_matcher, _html, _css_selector, []) do
+    :skip
+  end
+  defp check_collection(matcher, html, css_selector, attributes) do
+    sub_context = Selector.find(html, css_selector) || html
+
+    # check :match meta-attribute
+    {contain_value, attributes} = Keyword.pop(attributes, :match)
     contain_value && Matcher.contain(matcher, sub_context, contain_value)
 
-    if attributes != [] do
-      Matcher.attributes(matcher, sub_context, attributes)
-    end
-  end
+    # check :count meta-attribute
+    {count_value, attributes} = Keyword.pop(attributes, :count)
+    count_value && Matcher.count(matcher, html, css_selector, count_value)
 
-  defp get_context(%{context: context, css_selector: nil}) do
+    #  check :min meta-attribute
+    {min_value, attributes} = Keyword.pop(attributes, :min)
+    min_value && Matcher.min(matcher, html, css_selector, min_value)
+
+    # check :max meta-attribute
+    {max_value, attributes} = Keyword.pop(attributes, :max)
+    max_value && Matcher.max(matcher, html, css_selector, max_value)
+ end
+
+
+  defp get_context(matcher, context, css_selector, attributes)
+
+  defp get_context(_matcher, context, nil = _css_selector, _attributes) do
     context
   end
 
-  defp get_context(%{matcher: :refute, attributes: attributes, context: context, css_selector: css_selector}) when attributes != [] do
+  defp get_context(:refute, context, css_selector, _attributes) do
     Selector.find(context, css_selector)
   end
 
-  defp get_context(%{matcher: matcher, context: context, css_selector: css_selector}) do
+  defp get_context(matcher, context, css_selector, attributes) do
     Matcher.selector(matcher, context, css_selector)
   end
+
+  # defp get_context(_matcher, context, css_selector, _attributes) do
+  #   Selector.find(context, css_selector)
+  # end
+
 end

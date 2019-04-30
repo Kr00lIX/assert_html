@@ -8,9 +8,16 @@ defmodule AssertHTML.Matcher do
 
   @typep assert_or_refute :: :assert | :refute
 
-  @spec selector(assert_or_refute, binary, binary()) :: nil | AssertHTML.html()
-  def selector(matcher, html, selector) when is_binary(html) and is_binary(selector) do
-    docs = Parser.find(html, selector)
+  ## ----------------------------------------------------
+  ## Collection
+
+  @spec selector(assert_or_refute, binary, binary()| nil) :: nil | AssertHTML.html()
+  def selector(matcher, html, selector) when is_binary(html) and (is_binary(selector) or is_nil(selector)) do
+    docs = if selector == nil do
+      []
+    else
+      Parser.find(html, selector)
+    end
 
     # found more than one element
     if length(docs) > 1 do
@@ -32,6 +39,49 @@ defmodule AssertHTML.Matcher do
 
     Parser.to_html(docs)
   end
+
+  @doc """
+  Check count of elements on selector
+  """
+  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
+  def count(matcher, html, selector, check_value) do
+    count_elements = Parser.count(html, selector)
+
+    raise_match(matcher, count_elements != check_value, fn
+      :assert -> [message: "Expected #{check_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: check_value]
+      :refute -> [message: "Expected  different number of element(s), but received equal", left: count_elements, right: check_value]
+    end)
+  end
+
+  @doc """
+  Check count of elements on selector
+  """
+  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
+  def min(matcher, html, selector, min_value) do
+    count_elements = Parser.count(html, selector)
+
+    raise_match(matcher, count_elements < min_value, fn
+      :assert -> [message: "Expected at least #{min_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: min_value]
+      :refute -> [message: "Expected at most #{min_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: min_value]
+    end)
+  end
+
+  @doc """
+  Check count of elements on selector
+  """
+  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
+  def max(matcher, html, selector, max_value) do
+    count_elements = Parser.count(html, selector)
+
+    raise_match(matcher, count_elements > max_value, fn
+      :assert -> [message: "Expected at most #{max_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: max_value]
+      :refute -> [message: "Expected at least #{max_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: max_value]
+    end)
+  end
+
+
+  ## ----------------------------------------------------
+  ## Element
 
   @spec attributes(assert_or_refute, AssertHTML.html(), AssertHTML.attributes()) :: any()
   def attributes(matcher, html, attributes) when is_list(attributes) do

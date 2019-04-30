@@ -4,6 +4,9 @@ defmodule AssertHTML.Selector do
   alias AssertHTML.Parser
 
   @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: AssertHTML.html() | nil
+  def find(_html, nil) do
+    nil
+  end
   def find(html, css_selector) do
     html
     |> Parser.find(css_selector)

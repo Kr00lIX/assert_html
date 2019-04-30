@@ -55,7 +55,7 @@ defmodule AssertHTMLTest do
       html = ~S{
         <div id="main" class="container">
           <h1>Hello</h1>
-          <p class="description highligh">
+          <p class="description highlight">
             Long Read Paragraph
           </p>
           World
@@ -68,12 +68,12 @@ defmodule AssertHTMLTest do
       assert_html(html, "#main", [class: "container", id: "main", text: "World"], fn sub_html ->
         assert_html(sub_html, "h1", class: nil, text: "Hello")
         refute_html(sub_html, "h2")
-        assert_html(sub_html, "p", class: "highligh", text: ~r"Read")
+        assert_html(sub_html, "p", class: "highlight", text: ~r"Read")
       end)
     end
   end
 
-  describe ".asserth_html (check contains)" do
+  describe ".assert_html (check contains)" do
     setup do
       [html: ~S{
         <div class="content">
@@ -163,5 +163,26 @@ defmodule AssertHTMLTest do
         refute_html(html, ".container li")
       end
     end
+
+    test "expect count meta-attribute to equal number of elements found", %{html: html} do
+      assert_html(html, ".container", [count: 1], fn sub_html ->
+        assert_html(sub_html, "h1", count: 1)
+        assert_html(sub_html, "li", count: 3)
+      end)
+    end
+
+    test "expect min meta-attribute that number of elements found is greater than or equal", %{html: html} do
+	      assert_html(html, ".container", [min: 1], fn sub_html ->
+	        assert_html(sub_html, "h1", min: 1)
+	        assert_html(sub_html, "li", min: 3)
+	      end)
+	    end
+
+	    test "expect max meta-attribute that number of elements found is less than or equal", %{html: html} do
+	      assert_html(html, ".container", [max: 1], fn sub_html ->
+	        assert_html(sub_html, "h1", max: 1)
+	        assert_html(sub_html, "li", max: 3)
+	      end)
+	    end
   end
 end

@@ -41,6 +41,11 @@ defmodule AssertHTML.Parser do
     Floki.find(html, selector)
   end
 
+  @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: integer()
+  def count(html, selector) do
+    find(html, selector) |> Enum.count()
+  end
+
   @doc """
   Returns attribute value for a given selector.
   """
