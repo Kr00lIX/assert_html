@@ -58,7 +58,7 @@ defmodule AssertHTML do
 
   """
 
-  alias AssertHTML.{Debug, Matcher, Selector}
+  alias AssertHTML.{Debug, Matcher}
 
   @collection_checks [:match, :count, :min, :max]
 
@@ -269,10 +269,12 @@ defmodule AssertHTML do
   end
 
   ###################################
-  ### refute
+  ### Refute
 
   @doc ~S"""
+  Opposite method for assert_html
 
+  See more (t:refute_html/2)
   """
   @spec refute_html(html, Regex.t()) :: html | no_return()
   def refute_html(html, %Regex{} = value) do
@@ -325,6 +327,7 @@ defmodule AssertHTML do
   defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
     html(matcher, context, css_selector, [], block_fn)
   end
+
   defp html(matcher, context, css_selector, attributes, block_fn) when is_map(attributes) do
     attributes = Enum.into(attributes, [])
     html(matcher, context, css_selector, attributes, block_fn)
@@ -338,49 +341,51 @@ defmodule AssertHTML do
               (is_function(block_fn) or is_nil(block_fn)) do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
-    {collection_params, attributes_params} = Keyword.split(attributes, @collection_checks)
+    params = {collection_params, attributes_params} = Keyword.split(attributes, @collection_checks)
 
-    ## collection checks
+    # check selector
+    check_selector(params, {matcher, context}, css_selector)
 
-    # check :count, :min, :max and :match collection
+    # collection checks (:count, :min, :max and :match collection)
     check_collection(matcher, context, css_selector, collection_params)
 
+    # check element attributes
+    check_element(matcher, context, css_selector, attributes_params)
 
-    ## element checks
-    if attributes_params != [] do
-      sub_context = get_context(matcher, context, css_selector, attributes_params)
-      check_element(matcher, sub_context, attributes_params)
-
-      # call inside block
-      block_fn && block_fn.(sub_context)
-    else
-      # call inside block
-      block_fn && block_fn.(context)
+    # call inside block
+    if block_fn do
+      sub_context = get_context({matcher, context}, css_selector, once: true)
+      block_fn.(sub_context)
     end
-
-    # if ! has_collection_checks? do
-    #   Matcher.selector(matcher, context, css_selector)
-    # end
 
     context
   end
 
-  defp check_element(_matcher, _sub_context, []) do
+  defp check_element(matcher, html, css_selector, attributes)
+
+  defp check_element(_matcher, _html, _css_selector, [] = _attributes) do
     :skip
   end
-  defp check_element(matcher, sub_context, attributes) do
+
+  defp check_element(matcher, html, css_selector, attributes) do
+    sub_context = get_context({matcher, html}, css_selector, once: true, skip_refute: true)
+
     Matcher.attributes(matcher, sub_context, attributes)
   end
 
   defp check_collection(_matcher, _html, _css_selector, []) do
     :skip
   end
-  defp check_collection(matcher, html, css_selector, attributes) do
-    sub_context = Selector.find(html, css_selector) || html
 
+  # assert check selection exists
+  defp check_collection(matcher, html, css_selector, attributes) do
     # check :match meta-attribute
     {contain_value, attributes} = Keyword.pop(attributes, :match)
-    contain_value && Matcher.contain(matcher, sub_context, contain_value)
+
+    if contain_value do
+      sub_context = get_context({matcher, html}, css_selector, once: true, skip_refute: true)
+      Matcher.contain(matcher, sub_context, contain_value)
+    end
 
     # check :count meta-attribute
     {count_value, attributes} = Keyword.pop(attributes, :count)
@@ -391,27 +396,33 @@ defmodule AssertHTML do
     min_value && Matcher.min(matcher, html, css_selector, min_value)
 
     # check :max meta-attribute
-    {max_value, attributes} = Keyword.pop(attributes, :max)
+    {max_value, _attributes} = Keyword.pop(attributes, :max)
     max_value && Matcher.max(matcher, html, css_selector, max_value)
- end
+  end
 
-
-  defp get_context(matcher, context, css_selector, attributes)
-
-  defp get_context(_matcher, context, nil = _css_selector, _attributes) do
+  defp get_context({_matcher, context}, nil, _options) do
     context
   end
 
-  defp get_context(:refute, context, css_selector, _attributes) do
-    Selector.find(context, css_selector)
+  defp get_context({matcher, html}, css_selector, options) do
+    Matcher.selector(matcher, html, css_selector, options)
   end
 
-  defp get_context(matcher, context, css_selector, attributes) do
-    Matcher.selector(matcher, context, css_selector)
+  defp check_selector(params, mc, css_selector)
+
+  defp check_selector({[], []}, mc, css_selector) do
+    get_context(mc, css_selector, once: true)
   end
 
-  # defp get_context(_matcher, context, css_selector, _attributes) do
-  #   Selector.find(context, css_selector)
-  # end
+  defp check_selector({[], _}, mc, css_selector) do
+    get_context(mc, css_selector, once: true, skip_refute: true)
+  end
 
+  defp check_selector({_, []}, mc, css_selector) do
+    get_context(mc, css_selector, skip_refute: true)
+  end
+
+  defp check_selector(_params, _mc, _css_selector) do
+    :ok
+  end
 end

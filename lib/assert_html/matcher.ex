@@ -11,13 +11,18 @@ defmodule AssertHTML.Matcher do
   ## ----------------------------------------------------
   ## Collection
 
-  @spec selector(assert_or_refute, binary, binary()| nil) :: nil | AssertHTML.html()
-  def selector(matcher, html, selector) when is_binary(html) and (is_binary(selector) or is_nil(selector)) do
-    docs = if selector == nil do
-      []
-    else
-      Parser.find(html, selector)
-    end
+  @doc """
+  Checks if selector exsists
+  """
+
+  @spec find(assert_or_refute, binary, nil) :: nil
+  def find(_matcher, _html, nil = _selector) do
+    nil
+  end
+
+  @spec find(assert_or_refute, binary, binary()) :: AssertHTML.html()
+  def find(matcher, html, selector) when is_binary(html) and is_binary(selector) do
+    docs = Parser.find(html, selector)
 
     # found more than one element
     if length(docs) > 1 do
@@ -41,6 +46,43 @@ defmodule AssertHTML.Matcher do
   end
 
   @doc """
+  Gets html by selector and raise error if it doesn't exists
+
+  # Options
+  * `once` - only one element
+  * `skip_refute` - do not raise error if element exists for refute
+  """
+  @spec selector(assert_or_refute, binary, binary(), list()) :: AssertHTML.html()
+  def selector(matcher, html, selector, options \\ []) when is_binary(html) and is_binary(selector) do
+    docs = Parser.find(html, selector)
+
+    # found more than one element
+    if options[:once] && length(docs) > 1 do
+      raise_match(matcher, matcher == :assert, fn
+        :assert ->
+          "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{
+            html
+          }\n"
+
+        :refute ->
+          "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
+      end)
+    end
+
+    raise_match(matcher, docs == [], fn
+      :assert ->
+        "Element `#{selector}` not found.\n\n\t#{html}\n"
+
+      :refute ->
+        if options[:skip_refute],
+          do: nil,
+          else: "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
+    end)
+
+    Parser.to_html(docs)
+  end
+
+  @doc """
   Check count of elements on selector
   """
   @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
@@ -56,7 +98,7 @@ defmodule AssertHTML.Matcher do
   @doc """
   Check count of elements on selector
   """
-  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
+  @spec min(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
   def min(matcher, html, selector, min_value) do
     count_elements = Parser.count(html, selector)
 
@@ -69,7 +111,7 @@ defmodule AssertHTML.Matcher do
   @doc """
   Check count of elements on selector
   """
-  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
+  @spec max(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
   def max(matcher, html, selector, max_value) do
     count_elements = Parser.count(html, selector)
 
@@ -78,7 +120,6 @@ defmodule AssertHTML.Matcher do
       :refute -> [message: "Expected at least #{max_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: max_value]
     end)
   end
-
 
   ## ----------------------------------------------------
   ## Element
@@ -173,8 +214,11 @@ defmodule AssertHTML.Matcher do
     end
     |> if do
       message_or_args = message_fn.(check)
-      args = (is_list(message_or_args) && message_or_args) || [message: message_or_args]
-      raise ExUnit.AssertionError, args
+
+      if message_or_args do
+        args = (is_list(message_or_args) && message_or_args) || [message: message_or_args]
+        raise ExUnit.AssertionError, args
+      end
     end
   end
 end

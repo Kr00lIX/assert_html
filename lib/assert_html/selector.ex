@@ -7,6 +7,7 @@ defmodule AssertHTML.Selector do
   def find(_html, nil) do
     nil
   end
+
   def find(html, css_selector) do
     html
     |> Parser.find(css_selector)

@@ -103,4 +103,52 @@ defmodule AssertHTMLTest.MatcherTest do
       end
     end
   end
+
+  describe ".find" do
+    setup do
+      [html: ~S{<main class="container"
+        <ul>
+          <li>One</li>
+          <li>Two</li>
+        </ul>
+        </main>}]
+    end
+
+    test "assert: raise error if found more than two elements", %{html: html} do
+      assert_raise AssertionError, ~r{Found more than one element by `.container li` selector}, fn ->
+        find(:assert, html, ".container li")
+      end
+    end
+
+    test "assert: returns HTML if element exsists", %{html: html} do
+      assert find(:assert, html, ".container li:first-child") == "<li>One</li>"
+    end
+
+    test "refute: raise error if element exsists", %{html: html} do
+      assert_raise AssertionError, ~r{Selector `.container li` succeeded, but should have failed.}, fn ->
+        find(:refute, html, ".container li")
+      end
+    end
+  end
+
+  describe ".selector" do
+    setup do
+      [html: ~S{<main class="container"
+        <ul>
+          <li>One</li>
+          <li>Two</li>
+        </ul>
+        </main>}]
+    end
+
+    test "assert: returns HTML if selection exsists", %{html: html} do
+      assert selector(:assert, html, ".container li") == "<li>One</li><li>Two</li>"
+    end
+
+    test "refute: raise error if selection exsists", %{html: html} do
+      assert_raise AssertionError, ~r{Selector }, fn ->
+        selector(:refute, html, ".container li")
+      end
+    end
+  end
 end

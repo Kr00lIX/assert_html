@@ -106,7 +106,7 @@ defmodule AssertHTMLTest do
       refute_html(html, "h1", match: "Hello World!!!")
     end
 
-    test "check contains as second argument", %{html: html} do
+    test "check contains as a second argument", %{html: html} do
       refute_html(html, "h1", ~r{Hello World!!!!})
 
       assert_raise AssertionError, ~r"Value `~r/Hello World/` matched, but shouldn't.", fn ->
@@ -172,17 +172,17 @@ defmodule AssertHTMLTest do
     end
 
     test "expect min meta-attribute that number of elements found is greater than or equal", %{html: html} do
-	      assert_html(html, ".container", [min: 1], fn sub_html ->
-	        assert_html(sub_html, "h1", min: 1)
-	        assert_html(sub_html, "li", min: 3)
-	      end)
-	    end
+      assert_html(html, ".container", [min: 1], fn sub_html ->
+        assert_html(sub_html, "h1", min: 1)
+        assert_html(sub_html, "li", min: 3)
+      end)
+    end
 
-	    test "expect max meta-attribute that number of elements found is less than or equal", %{html: html} do
-	      assert_html(html, ".container", [max: 1], fn sub_html ->
-	        assert_html(sub_html, "h1", max: 1)
-	        assert_html(sub_html, "li", max: 3)
-	      end)
-	    end
+    test "expect max meta-attribute that number of elements found is less than or equal", %{html: html} do
+      assert_html(html, ".container", [max: 1], fn sub_html ->
+        assert_html(sub_html, "h1", max: 1)
+        assert_html(sub_html, "li", max: 3)
+      end)
+    end
   end
 end

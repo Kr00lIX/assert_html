@@ -74,7 +74,7 @@ defmodule AssertHTML.DSLTest do
       }]
     end
 
-    test "check tags", %{html: html} do
+    test "check elements", %{html: html} do
       html
       |> assert_html("form", class: "form", method: "post", action: "/session/login") do
         refute_html(".message")
