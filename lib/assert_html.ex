@@ -100,6 +100,10 @@ defmodule AssertHTML do
   """
   @type html :: String.t()
 
+  @typep matcher :: :assert | :refute
+
+  @type context :: {matcher, html}
+
   @typedoc """
   HTML element attributes
   """
@@ -322,104 +326,105 @@ defmodule AssertHTML do
     html(:refute, html, css_selector, attributes, block_fn)
   end
 
-  defp html(matcher, context, css_selector, attributes \\ nil, block_fn \\ nil)
+  defp html(matcher, html_content, css_selector, attributes \\ nil, block_fn \\ nil)
 
-  defp html(matcher, context, css_selector, nil = _attributes, block_fn) do
-    html(matcher, context, css_selector, [], block_fn)
+  defp html(matcher, html_content, css_selector, nil = _attributes, block_fn) do
+    html(matcher, html_content, css_selector, [], block_fn)
   end
 
-  defp html(matcher, context, css_selector, attributes, block_fn) when is_map(attributes) do
+  defp html(matcher, html_content, css_selector, attributes, block_fn) when is_map(attributes) do
     attributes = Enum.into(attributes, [])
-    html(matcher, context, css_selector, attributes, block_fn)
+    html(matcher, html_content, css_selector, attributes, block_fn)
   end
 
-  defp html(matcher, context, css_selector, attributes, block_fn)
+  defp html(matcher, html_content, css_selector, attributes, block_fn)
        when matcher in [:assert, :refute] and
-              is_binary(context) and
+              is_binary(html_content) and
               (is_binary(css_selector) or is_nil(css_selector)) and
               is_list(attributes) and
               (is_function(block_fn) or is_nil(block_fn)) do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
     params = {collection_params, attributes_params} = Keyword.split(attributes, @collection_checks)
+    context = {matcher, html_content}
 
     # check selector
-    check_selector(params, {matcher, context}, css_selector)
+    check_selector(params, context, css_selector)
 
     # collection checks (:count, :min, :max and :match collection)
-    check_collection(matcher, context, css_selector, collection_params)
+    check_collection(collection_params, context, css_selector)
 
     # check element attributes
-    check_element(matcher, context, css_selector, attributes_params)
+    check_element(attributes_params, context, css_selector)
 
     # call inside block
     if block_fn do
-      sub_context = get_context({matcher, context}, css_selector, once: true)
-      block_fn.(sub_context)
+      sub_html_content = get_sub_html!(context, css_selector, once: true)
+      block_fn.(sub_html_content)
     end
 
-    context
+    html_content
   end
 
-  defp check_element(matcher, html, css_selector, attributes)
+  defp check_element(attributes, context, css_selector)
 
-  defp check_element(_matcher, _html, _css_selector, [] = _attributes) do
+  defp check_element([], _context, _css_selector) do
     :skip
   end
 
-  defp check_element(matcher, html, css_selector, attributes) do
-    sub_context = get_context({matcher, html}, css_selector, once: true, skip_refute: true)
+  defp check_element(attributes, {matcher, html}, css_selector) do
+    sub_html_content = get_sub_html!({matcher, html}, css_selector, once: true, skip_refute: true)
 
-    Matcher.attributes(matcher, sub_context, attributes)
+    Matcher.attributes({matcher, sub_html_content}, attributes)
   end
 
-  defp check_collection(_matcher, _html, _css_selector, []) do
+  defp check_collection([], _context, _css_selector) do
     :skip
   end
 
   # assert check selection exists
-  defp check_collection(matcher, html, css_selector, attributes) do
+  defp check_collection(attributes, {matcher, html} = context, css_selector) do
     # check :match meta-attribute
     {contain_value, attributes} = Keyword.pop(attributes, :match)
 
     if contain_value do
-      sub_context = get_context({matcher, html}, css_selector, once: true, skip_refute: true)
-      Matcher.contain(matcher, sub_context, contain_value)
+      sub_html_content = get_sub_html!(context, css_selector, once: true, skip_refute: true)
+      Matcher.contain({matcher, sub_html_content}, contain_value)
     end
 
     # check :count meta-attribute
     {count_value, attributes} = Keyword.pop(attributes, :count)
-    count_value && Matcher.count(matcher, html, css_selector, count_value)
+    count_value && Matcher.count(context, css_selector, count_value)
 
     #  check :min meta-attribute
     {min_value, attributes} = Keyword.pop(attributes, :min)
-    min_value && Matcher.min(matcher, html, css_selector, min_value)
+    min_value && Matcher.min(context, css_selector, min_value)
 
     # check :max meta-attribute
     {max_value, _attributes} = Keyword.pop(attributes, :max)
-    max_value && Matcher.max(matcher, html, css_selector, max_value)
+    max_value && Matcher.max(context, css_selector, max_value)
   end
 
-  defp get_context({_matcher, context}, nil, _options) do
-    context
+  defp get_sub_html!({_matcher, html_content}, nil, _options) do
+    html_content
   end
 
-  defp get_context({matcher, html}, css_selector, options) do
-    Matcher.selector(matcher, html, css_selector, options)
+  defp get_sub_html!(context, css_selector, options) do
+    Matcher.selector(context, css_selector, options)
   end
 
-  defp check_selector(params, mc, css_selector)
+  defp check_selector(params, context, css_selector)
 
-  defp check_selector({[], []}, mc, css_selector) do
-    get_context(mc, css_selector, once: true)
+  defp check_selector({[], []}, context, css_selector) do
+    get_sub_html!(context, css_selector, once: true)
   end
 
-  defp check_selector({[], _}, mc, css_selector) do
-    get_context(mc, css_selector, once: true, skip_refute: true)
+  defp check_selector({[], _}, context, css_selector) do
+    get_sub_html!(context, css_selector, once: true, skip_refute: true)
   end
 
-  defp check_selector({_, []}, mc, css_selector) do
-    get_context(mc, css_selector, skip_refute: true)
+  defp check_selector({_, []}, context, css_selector) do
+    get_sub_html!(context, css_selector, skip_refute: true)
   end
 
   defp check_selector(_params, _mc, _css_selector) do

@@ -12,48 +12,14 @@ defmodule AssertHTML.Matcher do
   ## Collection
 
   @doc """
-  Checks if selector exsists
-  """
-
-  @spec find(assert_or_refute, binary, nil) :: nil
-  def find(_matcher, _html, nil = _selector) do
-    nil
-  end
-
-  @spec find(assert_or_refute, binary, binary()) :: AssertHTML.html()
-  def find(matcher, html, selector) when is_binary(html) and is_binary(selector) do
-    docs = Parser.find(html, selector)
-
-    # found more than one element
-    if length(docs) > 1 do
-      raise_match(matcher, matcher == :assert, fn
-        :assert ->
-          "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{
-            html
-          }\n"
-
-        :refute ->
-          "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
-      end)
-    else
-      raise_match(matcher, docs == [], fn
-        :assert -> "Element `#{selector}` not found.\n\n\t#{html}\n"
-        :refute -> "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
-      end)
-    end
-
-    Parser.to_html(docs)
-  end
-
-  @doc """
   Gets html by selector and raise error if it doesn't exists
 
   # Options
   * `once` - only one element
   * `skip_refute` - do not raise error if element exists for refute
   """
-  @spec selector(assert_or_refute, binary, binary(), list()) :: AssertHTML.html()
-  def selector(matcher, html, selector, options \\ []) when is_binary(html) and is_binary(selector) do
+  @spec selector(AssertHTML.context(), binary(), list()) :: AssertHTML.html()
+  def selector({matcher, html}, selector, options \\ []) when is_binary(html) and is_binary(selector) do
     docs = Parser.find(html, selector)
 
     # found more than one element
@@ -85,8 +51,8 @@ defmodule AssertHTML.Matcher do
   @doc """
   Check count of elements on selector
   """
-  @spec count(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
-  def count(matcher, html, selector, check_value) do
+  @spec count(AssertHTML.context(), binary(), integer()) :: any()
+  def count({matcher, html}, selector, check_value) do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements != check_value, fn
@@ -98,8 +64,8 @@ defmodule AssertHTML.Matcher do
   @doc """
   Check count of elements on selector
   """
-  @spec min(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
-  def min(matcher, html, selector, min_value) do
+  @spec min(AssertHTML.context(), binary(), integer()) :: any()
+  def min({matcher, html}, selector, min_value) do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements < min_value, fn
@@ -111,8 +77,8 @@ defmodule AssertHTML.Matcher do
   @doc """
   Check count of elements on selector
   """
-  @spec max(assert_or_refute, AssertHTML.html(), binary(), integer()) :: any()
-  def max(matcher, html, selector, max_value) do
+  @spec max(AssertHTML.context(), binary(), integer()) :: any()
+  def max({matcher, html}, selector, max_value) do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements > max_value, fn
@@ -124,8 +90,8 @@ defmodule AssertHTML.Matcher do
   ## ----------------------------------------------------
   ## Element
 
-  @spec attributes(assert_or_refute, AssertHTML.html(), AssertHTML.attributes()) :: any()
-  def attributes(matcher, html, attributes) when is_list(attributes) do
+  @spec attributes(AssertHTML.context(), AssertHTML.attributes()) :: any()
+  def attributes({matcher, html}, attributes) when is_list(attributes) do
     attributes
     |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
     |> Enum.each(fn {attribute, check_value} ->
@@ -134,16 +100,16 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  @spec contain(assert_or_refute, binary(), Regex.t()) :: any()
-  def contain(matcher, html, %Regex{} = value) when is_binary(html) do
+  @spec contain(AssertHTML.context(), Regex.t()) :: any()
+  def contain({matcher, html}, %Regex{} = value) when is_binary(html) do
     raise_match(matcher, !Regex.match?(value, html), fn
       :assert -> [message: "Value not matched.", left: html, right: value]
       :refute -> [message: "Value `#{inspect(value)}` matched, but shouldn't.", left: html, right: value]
     end)
   end
 
-  @spec contain(assert_or_refute, AssertHTML.html(), AssertHTML.html()) :: any()
-  def contain(matcher, html, value) when is_binary(html) and is_binary(value) do
+  @spec contain(AssertHTML.context(), AssertHTML.html()) :: any()
+  def contain({matcher, html}, value) when is_binary(html) and is_binary(value) do
     raise_match(matcher, !String.contains?(html, value), fn
       :assert -> [message: "Value not found.", left: html, right: value]
       :refute -> [message: "Value `#{inspect(value)}` found, but shouldn't.", left: html, right: value]
