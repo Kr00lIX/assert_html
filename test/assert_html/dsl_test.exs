@@ -21,7 +21,9 @@ defmodule AssertHTML.DSLTest do
                  "\n        <div class=\"container\">\n          <h1>Title</h1>\n          <p class=\"hard_decision\">\n            <a class=\"active link1\">Yes</a>\n            <a class=\"link2\">No</a>\n          </p>\n        </div>\n    "
 
         assert_html("p") do
-          assert assert_html == "<p class=\"hard_decision\"><a class=\"active link1\">Yes</a><a class=\"link2\">No</a></p>"
+          assert assert_html ==
+                   "<p class=\"hard_decision\"><a class=\"active link1\">Yes</a><a class=\"link2\">No</a></p>"
+
           assert_html("a.link1", class: "active", text: "Yes")
           assert_html("a.link2", id: nil, text: "No")
         end
@@ -81,12 +83,25 @@ defmodule AssertHTML.DSLTest do
 
         assert_html ".-email" do
           assert_html("label", text: "Email", for: "staticEmail", class: "col-form-label")
-          assert_html("div input", type: "text", readonly: true, class: "form-control-plaintext", value: "email@example.com")
+
+          assert_html("div input",
+            type: "text",
+            readonly: true,
+            class: "form-control-plaintext",
+            value: "email@example.com"
+          )
         end
 
         assert_html(".-password") do
           assert_html("label", text: "Password", for: "inputPassword")
-          assert_html("div input", placeholder: "Password", type: "password", class: "form-control", id: "inputPassword", placeholder: "Password")
+
+          assert_html("div input",
+            placeholder: "Password",
+            type: "password",
+            class: "form-control",
+            id: "inputPassword",
+            placeholder: "Password"
+          )
         end
 
         assert_html("button", type: "submit", class: "primary")

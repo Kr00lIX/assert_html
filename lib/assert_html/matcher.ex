@@ -56,8 +56,19 @@ defmodule AssertHTML.Matcher do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements != check_value, fn
-      :assert -> [message: "Expected #{check_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: check_value]
-      :refute -> [message: "Expected  different number of element(s), but received equal", left: count_elements, right: check_value]
+      :assert ->
+        [
+          message: "Expected #{check_value} element(s). Got #{count_elements} element(s).",
+          left: count_elements,
+          right: check_value
+        ]
+
+      :refute ->
+        [
+          message: "Expected  different number of element(s), but received equal",
+          left: count_elements,
+          right: check_value
+        ]
     end)
   end
 
@@ -69,8 +80,19 @@ defmodule AssertHTML.Matcher do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements < min_value, fn
-      :assert -> [message: "Expected at least #{min_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: min_value]
-      :refute -> [message: "Expected at most #{min_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: min_value]
+      :assert ->
+        [
+          message: "Expected at least #{min_value} element(s). Got #{count_elements} element(s).",
+          left: count_elements,
+          right: min_value
+        ]
+
+      :refute ->
+        [
+          message: "Expected at most #{min_value} element(s). Got #{count_elements} element(s).",
+          left: count_elements,
+          right: min_value
+        ]
     end)
   end
 
@@ -82,8 +104,19 @@ defmodule AssertHTML.Matcher do
     count_elements = Parser.count(html, selector)
 
     raise_match(matcher, count_elements > max_value, fn
-      :assert -> [message: "Expected at most #{max_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: max_value]
-      :refute -> [message: "Expected at least #{max_value} element(s). Got #{count_elements} element(s).", left: count_elements, right: max_value]
+      :assert ->
+        [
+          message: "Expected at most #{max_value} element(s). Got #{count_elements} element(s).",
+          left: count_elements,
+          right: max_value
+        ]
+
+      :refute ->
+        [
+          message: "Expected at least #{max_value} element(s). Got #{count_elements} element(s).",
+          left: count_elements,
+          right: max_value
+        ]
     end)
   end
 
@@ -116,7 +149,13 @@ defmodule AssertHTML.Matcher do
     end)
   end
 
-  @spec match_attribute(assert_or_refute, AssertHTML.attribute_name(), AssertHTML.value(), binary() | nil, AssertHTML.html()) :: no_return
+  @spec match_attribute(
+          assert_or_refute,
+          AssertHTML.attribute_name(),
+          AssertHTML.value(),
+          binary() | nil,
+          AssertHTML.html()
+        ) :: no_return
   defp match_attribute(matcher, attribute, check_value, attr_value, html)
 
   # attribute should exists

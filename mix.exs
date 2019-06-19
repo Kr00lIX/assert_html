@@ -83,7 +83,7 @@ defmodule AssertHTML.MixProject do
       maintainers: ["Anatoliy Kovalchuk"],
       links: %{"GitHub" => @github_url},
       licenses: ["MIT"],
-      files: ~w(lib LICENSE.md mix.exs README.md CHANGELOG.md)
+      files: ~w(.formatter.exs mix.exs README.md CHANGELOG.md lib)
     }
   end
 end

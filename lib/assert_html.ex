@@ -242,28 +242,33 @@ defmodule AssertHTML do
   end
 
   @spec assert_html(html, Regex.t(), block_fn) :: html | no_return()
-  def assert_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
+  def assert_html(html, %Regex{} = value, block_fn)
+      when is_binary(html) and is_function(block_fn) do
     html(:assert, html, nil, [match: value], block_fn)
   end
 
   @spec assert_html(html, attributes, block_fn) :: html | no_return()
-  def assert_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
+  def assert_html(html, attributes, block_fn)
+      when is_binary(html) and is_list(attributes) and is_function(block_fn) do
     html(:assert, html, nil, attributes, block_fn)
   end
 
   @spec assert_html(html, css_selector, block_fn) :: html | no_return()
-  def assert_html(html, css_selector, block_fn) when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
+  def assert_html(html, css_selector, block_fn)
+      when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
     html(:assert, html, css_selector, nil, block_fn)
   end
 
   def assert_html(html, css_selector, attributes, block_fn \\ nil)
 
   @spec assert_html(html, css_selector, value, block_fn | nil) :: html | no_return()
-  def assert_html(html, css_selector, %Regex{} = value, block_fn) when is_binary(html) and is_binary(css_selector) do
+  def assert_html(html, css_selector, %Regex{} = value, block_fn)
+      when is_binary(html) and is_binary(css_selector) do
     html(:assert, html, css_selector, [match: value], block_fn)
   end
 
-  def assert_html(html, css_selector, value, block_fn) when is_binary(html) and is_binary(css_selector) and is_binary(value) do
+  def assert_html(html, css_selector, value, block_fn)
+      when is_binary(html) and is_binary(css_selector) and is_binary(value) do
     html(:assert, html, css_selector, [match: value], block_fn)
   end
 
@@ -296,17 +301,20 @@ defmodule AssertHTML do
   end
 
   @spec refute_html(html, Regex.t(), block_fn) :: html | no_return()
-  def refute_html(html, %Regex{} = value, block_fn) when is_binary(html) and is_function(block_fn) do
+  def refute_html(html, %Regex{} = value, block_fn)
+      when is_binary(html) and is_function(block_fn) do
     html(:refute, html, nil, [match: value], block_fn)
   end
 
   @spec refute_html(html, attributes, block_fn) :: html | no_return()
-  def refute_html(html, attributes, block_fn) when is_binary(html) and is_list(attributes) and is_function(block_fn) do
+  def refute_html(html, attributes, block_fn)
+      when is_binary(html) and is_list(attributes) and is_function(block_fn) do
     html(:refute, html, nil, attributes, block_fn)
   end
 
   @spec refute_html(html, css_selector, block_fn) :: html | no_return()
-  def refute_html(html, css_selector, block_fn) when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
+  def refute_html(html, css_selector, block_fn)
+      when is_binary(html) and is_binary(css_selector) and is_function(block_fn) do
     html(:refute, html, css_selector, nil, block_fn)
   end
 
@@ -317,7 +325,8 @@ defmodule AssertHTML do
     html(:refute, html, css_selector, [match: value], block_fn)
   end
 
-  def refute_html(html, css_selector, value, block_fn) when is_binary(html) and is_binary(css_selector) and is_binary(value) do
+  def refute_html(html, css_selector, value, block_fn)
+      when is_binary(html) and is_binary(css_selector) and is_binary(value) do
     html(:refute, html, css_selector, [match: value], block_fn)
   end
 
@@ -346,6 +355,7 @@ defmodule AssertHTML do
     Debug.log("call .html with arguments: #{inspect(binding())}")
 
     params = {collection_params, attributes_params} = Keyword.split(attributes, @collection_checks)
+
     context = {matcher, html_content}
 
     # check selector
@@ -383,7 +393,7 @@ defmodule AssertHTML do
   end
 
   # assert check selection exists
-  defp check_collection(attributes, {matcher, html} = context, css_selector) do
+  defp check_collection(attributes, {matcher, _html} = context, css_selector) do
     # check :match meta-attribute
     {contain_value, attributes} = Keyword.pop(attributes, :match)
 

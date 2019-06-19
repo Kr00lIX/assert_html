@@ -28,7 +28,8 @@ defmodule AssertHTMLTest do
     test "expect pass to callback selected html", %{html: html} do
       result_html =
         assert_html(html, ".container", fn sub_html ->
-          assert sub_html == "<div class=\"container\"><h1>Hello</h1><p class=\"description\">\n            Paragraph\n          </p><h1>World</h1></div>"
+          assert sub_html ==
+                   "<div class=\"container\"><h1>Hello</h1><p class=\"description\">\n            Paragraph\n          </p><h1>World</h1></div>"
 
           assert_html(sub_html, ".description", fn sub_html ->
             assert sub_html == "<p class=\"description\">\n            Paragraph\n          </p>"
