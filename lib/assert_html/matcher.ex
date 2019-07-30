@@ -136,16 +136,42 @@ defmodule AssertHTML.Matcher do
   @spec contain(AssertHTML.context(), Regex.t()) :: any()
   def contain({matcher, html}, %Regex{} = value) when is_binary(html) do
     raise_match(matcher, !Regex.match?(value, html), fn
-      :assert -> [message: "Value not matched.", left: html, right: value]
-      :refute -> [message: "Value `#{inspect(value)}` matched, but shouldn't.", left: html, right: value]
+      :assert ->
+        [
+          message: "Value not matched.",
+          left: value,
+          right: html,
+          expr: "assert_html(#{inspect(value)})"
+        ]
+
+      :refute ->
+        [
+          message: "Value `#{inspect(value)}` matched, but shouldn't.",
+          left: value,
+          right: html,
+          expr: "assert_html(#{inspect(value)})"
+        ]
     end)
   end
 
   @spec contain(AssertHTML.context(), AssertHTML.html()) :: any()
   def contain({matcher, html}, value) when is_binary(html) and is_binary(value) do
     raise_match(matcher, !String.contains?(html, value), fn
-      :assert -> [message: "Value not found.", left: html, right: value]
-      :refute -> [message: "Value `#{inspect(value)}` found, but shouldn't.", left: html, right: value]
+      :assert ->
+        [
+          message: "Value not found.",
+          left: value,
+          right: html,
+          expr: "assert_html(#{inspect(value)})"
+        ]
+
+      :refute ->
+        [
+          message: "Value `#{inspect(value)}` found, but shouldn't.",
+          left: value,
+          right: html,
+          expr: "assert_html(#{inspect(value)})"
+        ]
     end)
   end
 
