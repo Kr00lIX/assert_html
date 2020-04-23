@@ -38,7 +38,9 @@ defmodule AssertHTML.Parser do
   """
   @spec find(AssertHTML.html(), AssertHTML.css_selector()) :: html_tree
   def find(html, selector) do
-    Floki.find(html, selector)
+    html
+    |> Floki.parse_document!()
+    |> Floki.find(selector)
   end
 
   @spec count(AssertHTML.html(), AssertHTML.css_selector()) :: integer()
@@ -51,7 +53,10 @@ defmodule AssertHTML.Parser do
   """
   @spec attribute(AssertHTML.html(), String.t()) :: String.t() | nil
   def attribute(html, name) do
-    case Floki.attribute(html, name) do
+    html
+    |> Floki.parse_document!()
+    |> Floki.attribute(name)
+    |> case do
       [value] -> value
       _ -> nil
     end
@@ -59,7 +64,9 @@ defmodule AssertHTML.Parser do
 
   @spec text(AssertHTML.html()) :: String.t()
   def text(html_element_tuple) do
-    Floki.text(html_element_tuple, deep: false)
+    html_element_tuple
+    |> Floki.parse_document!()
+    |> Floki.text(deep: false)
   end
 
   @spec to_html(html_tree) :: String.t()
