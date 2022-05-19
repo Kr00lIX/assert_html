@@ -8,7 +8,7 @@ defmodule AssertHTML.MixProject do
     [
       app: :assert_html,
       version: @version,
-      elixir: "~> 1.5",
+      elixir: "~> 1.13",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -60,7 +60,7 @@ defmodule AssertHTML.MixProject do
       {:credo, "~> 1.0", only: [:dev, :test]},
 
       # Dev
-      {:dialyxir, "~> 1.0.0-rc.6", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
