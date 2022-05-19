@@ -26,9 +26,7 @@ defmodule AssertHTML.Matcher do
     if options[:once] && length(docs) > 1 do
       raise_match(matcher, matcher == :assert, fn
         :assert ->
-          "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{
-            html
-          }\n"
+          "Found more than one element by `#{selector}` selector.\nPlease use `#{selector}:first-child`, `#{selector}:nth-child(n)` for limiting search area.\n\n\t#{html}\n"
 
         :refute ->
           "Selector `#{selector}` succeeded, but should have failed.\n\n\t#{html}\n"
