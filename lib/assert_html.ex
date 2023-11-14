@@ -1,10 +1,11 @@
 defmodule AssertHTML do
   @moduledoc ~s"""
-   AssertHTML adds ExUnit assert helpers for testing rendered HTML using CSS selectors.
+  AssertHTML provides ExUnit assert helpers for testing rendered HTML using CSS selectors.
 
   ## Usage in Phoenix Controller and Integration Test
 
-  Assuming the `html_response(conn, 200)` returns:
+  Given the `html_response(conn, 200)` returns:
+
   ```html
   <!DOCTYPE html>
   <html>
@@ -18,43 +19,44 @@ defmodule AssertHTML do
   </html>
   ```
 
-  An example controller test:
+  An example controller test could be:
+
   ```elixir
   defmodule YourAppWeb.PageControllerTest do
     use YourAppWeb.ConnCase, async: true
 
     test "should get index", %{conn: conn} do
-      conn = conn
+      resp_conn = conn
       |> get(Routes.page_path(conn, :index))
 
       html_response(conn, 200)
-      # Page title is "PAGE TITLE"
+      # Asserts that the page title is "PAGE TITLE"
       |> assert_html("title", "PAGE TITLE")
-      # Page title is "PAGE TITLE" and there is only one title element
+      # Asserts that the page title is "PAGE TITLE" and there is only one title element
       |> assert_html("title", count: 1, text: "PAGE TITLE")
-      # Page title matches "PAGE" and there is only one title element
+      # Asserts that the page title matches "PAGE" and there is only one title element
       |> assert_html("title", count: 1, match: "PAGE")
-      # Page has one link with href value "/signup"
+      # Asserts that the page has one link with href value "/signup"
       |> assert_html("a[href='/signup']", count: 1)
-      # Page has at least one link
+      # Asserts that the page has at least one link
       |> assert_html("a", min: 1)
-      # Page has at most two links
+      # Asserts that the page has at most two links
       |> assert_html("a", max: 2)
-      # Page contains no forms
+      # Asserts that the page contains no forms
       |> refute_html("form")
     end
   end
   ```
 
-  ### Check selector
-  `assert_html(html, ".css .selector .exsits")` - assert error if element doesn't exists in selector path.
-  `refute_html(html, ".css .selector")` - assert error if element doesn't exists in selector path.
+  ### Selector Checks
+  `assert_html(html, ".css .selector .exsits")` - Asserts that an element exists in the selector path.
+  `refute_html(html, ".css .selector")` - Asserts that an element does not exist in the selector path.
 
   ### Check Attributes
   Supports meta attributes:
 
-  * `:text` – text in element
-  * `:match` - contain value.
+  * `:text` – The exact text within the element
+  * `:match` - A value that the element's text should contain.
 
   """
 
@@ -145,23 +147,23 @@ defmodule AssertHTML do
   @doc ~S"""
   Asserts an attributes in HTML element
 
-  ## assert attributes
-  - `:text` – asserts a text element in HTML
-  - `:match` - asserts containing value in HTML
+  ## Asserting Attributes
+  - `:text` – Asserts the exact text within an HTML element.
+  - `:match` - Asserts that the HTML element's text contains a specific value.
 
-  ```
+  ```elixir
   iex> html = ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
   ...> assert_html(html, ".zoo", class: "bar zoo")
   ~S{<div class="foo bar"></div><div class="zoo bar"></div>}
 
-  # check if `id` not exsists
+  # Check if `id` attribute does not exist
   iex> assert_html(~S{<div>text</div>}, id: nil)
   "<div>text</div>"
   ```
 
-  #### Examples check :text
+  #### Examples for :text
 
-  Asserts a text element in HTML
+  Asserts the exact text within an HTML element.
 
       iex> html = ~S{<h1 class="title">Header</h1>}
       ...> assert_html(html, text: "Header")
@@ -191,7 +193,7 @@ defmodule AssertHTML do
 
   `assert_html(html, "css selector")`
 
-  ```
+  ```elixir
       iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
       ...> assert_html(html, "p .foo h1")
       ~S{<p><div class="foo"><h1>Header</h1></div></p>}
@@ -202,11 +204,21 @@ defmodule AssertHTML do
   ```
 
   ## Match elements in HTML
+
+  Asserts that the HTML contains a specific element.
+
+  ```elixir
       assert_html(html, ~r{<p>Hello</p>})
       assert_html(html, match: ~r{<p>Hello</p>})
       assert_html(html, match: "<p>Hello</p>")
+  ```
 
-      \# Asserts a text element in HTML
+  ### Asserts a text element in HTML
+
+      iex> html = ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+      ...> assert_html(html, "p .foo h1", text: "Header")
+      ~S{<p><div class="foo"><h1>Header</h1></div></p>}
+
 
   ### Examples
 

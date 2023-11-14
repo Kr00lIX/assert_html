@@ -53,6 +53,8 @@ defmodule AssertHTML.MixProject do
   defp deps do
     [
       {:floki, "~> 0.21"},
+      # {:html5ever, "~> 0.15.0"},
+      # {:fast_html, ">= 0.0.1"},
 
       # Test
       {:excoveralls, "~> 0.10", only: :test},

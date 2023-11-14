@@ -1,21 +1,56 @@
-# AssertHTML
+# AssertHTML: Elixir Library for testing HTML and XML using CSS selectors
 
 [![Build Status](https://travis-ci.org/Kr00lIX/assert_html.svg?branch=master)](https://travis-ci.org/Kr00lIX/assert_html)
 [![Hex pm](https://img.shields.io/hexpm/v/assert_html.svg?style=flat)](https://hex.pm/packages/assert_html)
 [![Coverage Status](https://coveralls.io/repos/github/Kr00lIX/assert_html/badge.svg?branch=master)](https://coveralls.io/github/Kr00lIX/assert_html?branch=master)
  
- 
-AssertHTML is an Elixir library for parsing and extracting data from HTML and XML with CSS.		 AssertHTML adds ExUnit assert helpers for testing rendered HTML using CSS selectors.
+AssertHTML is a powerful Elixir library designed for parsing and extracting data from HTML and XML using CSS. It also provides ExUnit assert helpers for testing rendered HTML using CSS selectors, making it an essential tool for Phoenix Controller and Integration tests.
 
-It is very useful in Phoenix Controller and Integration tests.
+## Features
 
- 
+- **HTML and XML Parsing**: Easily parse and extract data from HTML and XML documents.
+- **CSS Selectors**: Use CSS selectors to find and manipulate elements in your HTML or XML.
+- **ExUnit Assert Helpers**: Test your rendered HTML with the help of ExUnit assert helpers.
+
+## Getting Started
+
+Follow these steps to get started with AssertHTML:
+
+1. **Install the Library**: Add `assert_html` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:assert_html, "~> 0.1"}
+  ]
+end
+```
+
+Then run `mix deps.get` to fetch the dependency.
+
+2. **Import formating**: Update your .formatter.exs file with the following import:
+
+```elixir
+[
+  import_deps: [
+    :assert_html
+  ]
+]
+```
+
+3. **Add the Library to your Test**: Add `AssertHTML` to your test file:
+
+```elixir
+use AssertHTML
+```
+
+
 ## Usage
-
 
 ### Usage in Phoenix Controller and Integration Test
 
 Assuming the `html_response(conn, 200)` returns:
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -35,44 +70,44 @@ An example controller test:
 defmodule YourAppWeb.PageControllerTest do
   use YourAppWeb.ConnCase, async: true
 
-  test "should get index", %{conn: conn} do
-    conn = conn
+  test "should get index", %{conn: conn} do        
+    resp_conn = conn
     |> get(Routes.page_path(conn, :index))
 
-    html_response(conn, 200)
-    # Page title is "PAGE TITLE"
+    html_response(resp_conn, 200)
+    # The page title is "PAGE TITLE"
     |> assert_html("title", "PAGE TITLE")
-    # Page title is "PAGE TITLE" and there is only one title element
+    # The page title is "PAGE TITLE", and there is only one title element
     |> assert_html("title", count: 1, text: "PAGE TITLE")
-    # Page title matches "PAGE" and there is only one title element
+    # The page title matches "PAGE", and there is only one title element
     |> assert_html("title", count: 1, match: "PAGE")
-    # Page has one link with href value "/signup"
+    # The page has one link with the href value "/signup"
     |> assert_html("a[href='/signup']", count: 1)
-    # Page has at least one link
+    # The page has at least one link
     |> assert_html("a", min: 1)
-    # Page has at most two links
+    # The page has at most two links
     |> assert_html("a", max: 2)
-    # Page contains no forms
+    # The page contains no forms
     |> refute_html("form")
   end
 end
 ```
 
 ### Contains
-  `assert_html(html, ~r{Hello World})` - match string in HTML  
-  `refute_html(html, ~r{Another World})` - should not contain string in HTML
 
-  ```
-   assert_html(html, ".content") do
-     assert_html(~r{Hello World})
-   end
-  ```    
+`assert_html(html, ~r{Hello World})` - match string in HTML  
+`refute_html(html, ~r{Another World})` - should not contain string in HTML
+
+```elixir
+assert_html(html, ".content") do
+  assert_html(~r{Hello World})
+end
+```    
       
 ### CSS selectors
 
-`assert_html(html, ".css .selector")` - check element exists in CSS selector path
-
-`refute_html(html, ".errors .error")` - element not exists in path
+`assert_html(html, ".css .selector")` - checks if an element exists in the CSS selector path
+`refute_html(html, ".errors .error")` - checks if an element does not exist in the path
 
 ### Check attributes
 
@@ -84,7 +119,7 @@ assert_html(html, "form", class: "form", method: "post", action: "/session/login
   end
   assert_html(".-password") do
     assert_html("label", text: "Password", for: "inputPassword")
-    assert_html("div input", placeholder: "Password", type: "password", class: "form-control", id: "inputPassword", placeholder: "Password")
+    assert_html("div input", placeholder: "Password", type: "password", class: "form-control", id: "inputPassword")
   end
 
   assert_html("button", type: "submit", class: "primary")
@@ -103,15 +138,15 @@ defmodule ExampleControllerTest do
     assert response = html_response(conn_resp, 200)
 
     assert_html response do
-      # Check element exists in CSS selector path
+      # Check if element exists in CSS selector path
       assert_html "p.description"
 
-      # element doesn't exists
+      # Check if element doesn't exist
       refute_html ".flash-message"
 
-      # assert form attributes
+      # Assert form attributes
       assert_html "form.new_page", action: Routes.page_path(conn, :create), method: "post" do
-        # assert elements inside the `form.new_page` selector
+        # Assert elements inside the `form.new_page` selector
         assert_html "label", class: "form-label", text: "Page name"
         assert_html "input", type: "text", class: "form-control", value: "", name: "page_name"
         assert_html "button", class: "form-button", text: "Submit"
@@ -124,24 +159,12 @@ end
 Documentation can be found at [https://hexdocs.pm/assert_html](https://hexdocs.pm/assert_html/AssertHTML.html).
 
 
-## Installation
-
-It's available in Hex, the package can be installed as:
-
-Add `assert_html` to your list of dependencies in mix.exs:
-
-```elixir
-def deps do
-  [
-    {:assert_html, ">= 0.0.1", only: :test}
-  ]
-end
-```
-Then run `mix deps.get` to get the package.
-
-
 ## Contribution
 Feel free to send your PR with proposals, improvements or corrections 😉.
+
+## Author
+
+Anatolii Kovalchuk (@Kr00liX)
 
 
 ## License

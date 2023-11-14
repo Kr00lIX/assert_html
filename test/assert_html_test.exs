@@ -55,7 +55,7 @@ defmodule AssertHTMLTest do
     setup do
       html = ~S{
         <div id="main" class="container">
-          <h1>Hello</h1>
+          <h1>Hello &amp; HTML</h1>
           <p class="description highlight">
             Long Read Paragraph
           </p>
@@ -67,7 +67,7 @@ defmodule AssertHTMLTest do
 
     test "expect pass equal attributes", %{html: html} do
       assert_html(html, "#main", [class: "container", id: "main", text: "World"], fn sub_html ->
-        assert_html(sub_html, "h1", class: nil, text: "Hello")
+        assert_html(sub_html, "h1", class: nil, text: "Hello & HTML")
         refute_html(sub_html, "h2")
         assert_html(sub_html, "p", class: "highlight", text: ~r"Read")
       end)
@@ -132,7 +132,7 @@ defmodule AssertHTMLTest do
     end
   end
 
-  describe ".asseth_html (multiply elements)" do
+  describe ".asserh_html (multiply elements)" do
     setup do
       [html: ~S{
         <div class="container">
