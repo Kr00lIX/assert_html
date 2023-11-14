@@ -1,7 +1,7 @@
 defmodule AssertHTML.MixProject do
   use Mix.Project
 
-  @version "0.1.3"
+  @version "0.1.4"
   @github_url "https://github.com/Kr00lIX/assert_html"
 
   def project do
@@ -80,7 +80,7 @@ defmodule AssertHTML.MixProject do
     %{
       name: "assert_html",
       contributors: ["Kr00lIX"],
-      maintainers: ["Anatoliy Kovalchuk"],
+      maintainers: ["Anatolii Kovalchuk"],
       links: %{"GitHub" => @github_url},
       licenses: ["MIT"],
       files: ~w(.formatter.exs mix.exs README.md CHANGELOG.md lib)
