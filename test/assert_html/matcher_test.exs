@@ -44,7 +44,7 @@ defmodule AssertHTMLTest.MatcherTest do
 
     test "expect error if attribute not exsists", %{html: html} do
       message =
-        "\n\nAttribute `id` not found.\n     \n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n     \n"
+        "\n\nAttribute `id` not found.\n\n     \t<main class=\"table -vertical\">quotes: &quot; &amp; &#39;</main>\n\n"
 
       assert_raise AssertionError, message, fn ->
         attributes({:assert, html}, id: "new_element")

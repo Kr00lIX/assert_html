@@ -1,14 +1,14 @@
 defmodule AssertHTML.MixProject do
   use Mix.Project
 
-  @version "0.1.4"
+  @version "0.2.0"
   @github_url "https://github.com/Kr00lIX/assert_html"
 
   def project do
     [
       app: :assert_html,
       version: @version,
-      elixir: "~> 1.13",
+      elixir: "~> 1.17",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -52,18 +52,18 @@ defmodule AssertHTML.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:floki, "~> 0.21"},
+      {:floki, ">= 0.30.0"},
       # {:html5ever, "~> 0.15.0"},
       # {:fast_html, ">= 0.0.1"},
 
       # Test
-      {:excoveralls, "~> 0.10", only: :test},
-      {:junit_formatter, "~> 3.0", only: :test},
-      {:credo, "~> 1.0", only: [:dev, :test]},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:junit_formatter, "~> 3.4", only: :test},
+      {:credo, "~> 1.7", only: [:dev, :test]},
 
       # Dev
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.4", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.35", only: :dev, runtime: false}
     ]
   end
 

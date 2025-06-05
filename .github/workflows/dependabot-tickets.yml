@@ -1,0 +1,26 @@
+name: Dependabot Tickets
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-dependabot-pull-requests:
+    runs-on: ubuntu-latest
+    name: Check for Dependabot Pull Requests
+    steps:
+      - name: Step 1
+        id: step_1
+        uses: ARPC/dependabot-tickets@v0.2.2
+        with:
+          fogbugz_api_url: ${{ secrets.FOGBUGZ_API_URL}}
+          fogbugz_token: ${{ secrets.FOGBUGZ_API_TOKEN }}
+          fogbugz_project: ${{ secrets.FOGBUGZ_PROJECT }}
+          fogbugz_category: ${{ secrets.FOGBUGZ_CATEGORY}}
+          planview_api_url: ${{ secrets.PLANVIEW_API_URL }}
+          planview_auth: ${{ secrets.LEANKIT_AUTH }}
+          planview_board_id: ${{ secrets.PLANVIEW_BOARD_ID }}
+          planview_lane_id: ${{ secrets.PLANVIEW_LANE_ID }}
+          planview_type_id: ${{ secrets.PLANVIEW_TYPE_ID }}
+          users: "dependabot[bot]"

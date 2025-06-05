@@ -24,3 +24,4 @@ assert_html-*.tar
 
 
 .elixir_ls
+.DS_Store
