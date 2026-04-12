@@ -63,7 +63,8 @@ defmodule AssertHTML.MixProject do
 
       # Dev
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.35", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false, warn_if_outdated: true},
+      {:makeup_html, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
