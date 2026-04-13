@@ -69,6 +69,13 @@ defmodule AssertHTML.Parser do
     |> Floki.text(deep: false)
   end
 
+  @spec deep_text(AssertHTML.html()) :: String.t()
+  def deep_text(html_element_tuple) do
+    html_element_tuple
+    |> Floki.parse_document!()
+    |> Floki.text()
+  end
+
   @spec to_html(html_tree) :: String.t()
   def to_html(html_element_tuple) do
     Floki.raw_html(html_element_tuple)

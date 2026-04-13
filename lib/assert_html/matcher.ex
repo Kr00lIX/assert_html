@@ -154,12 +154,14 @@ defmodule AssertHTML.Matcher do
 
   @spec contain(AssertHTML.context(), AssertHTML.html()) :: any()
   def contain({matcher, html}, value) when is_binary(html) and is_binary(value) do
-    raise_match(matcher, !String.contains?(html, value), fn
+    text = Parser.deep_text(html)
+
+    raise_match(matcher, !String.contains?(text, value), fn
       :assert ->
         [
           message: "Value not found.",
           left: value,
-          right: html,
+          right: text,
           expr: "assert_html(#{inspect(value)})"
         ]
 
@@ -167,7 +169,7 @@ defmodule AssertHTML.Matcher do
         [
           message: "Value `#{inspect(value)}` found, but shouldn't.",
           left: value,
-          right: html,
+          right: text,
           expr: "assert_html(#{inspect(value)})"
         ]
     end)
